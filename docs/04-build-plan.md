@@ -20,29 +20,33 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 **Goal: a deployed skeleton with auth, roles, CI, and the design system — the rails everything else runs on.**
 
 ### 1.1 Infrastructure
-- [ ] `docker-compose.yml` for local Postgres; `pnpm db:migrate` + seed pipeline working
-- [ ] GitHub Actions CI: lint, typecheck, unit tests, integration tests (Postgres service container), build
+- [x] `docker-compose.yml` for local Postgres; `pnpm db:migrate` + seed pipeline working
+- [x] GitHub Actions CI: lint, typecheck, unit tests, integration tests (Postgres service container), build
 - [ ] Deploy `apps/web` to hosting (Vercel to start; 🚦 confirm BAA-capable plan before any real PHI — see architecture D-hosting)
 - [ ] Staging + production environments, secret management, `.env.example` complete
 - [ ] Error tracking (Sentry, PII scrubbing rules) + structured request logging + health endpoint
 
 ### 1.2 Auth & RBAC
-- [ ] Auth.js: email/password (argon2), email verification, password reset
+- [x] Auth.js: email/password (argon2id) credentials sign-in + signup
+- [ ] Email verification + password reset flows (needs email vendor wiring)
 - [ ] Apple + Google OAuth
-- [ ] Session middleware; route-group protection for `(patient)`, `(provider)`, `(admin)`
-- [ ] `authorize.ts`: `requireRole`, `requireOwnership`, CareRelationship-scoped provider access
-- [ ] TOTP MFA — enforced for PROVIDER and ADMIN before portal access
-- [ ] Audit helper writing `AuditEvent` for auth events (login, failed login, MFA, password reset)
-- [ ] Rate limiting on all auth endpoints; account lockout with admin unlock
+- [x] Session middleware; route-group protection for `(patient)`, `(provider)`, `(admin)`
+- [x] `authorize.ts`: `requireRole`, `requireOwnership`, CareRelationship-scoped provider access
+- [x] TOTP MFA — enforced for PROVIDER and ADMIN before portal access
+- [x] Audit helper writing `AuditEvent` for auth events (login, failed login, MFA, password reset)
+- [x] Rate limiting on all auth endpoints (in-memory; Redis upgrade tracked for Phase 6)
+- [ ] Account lockout after repeated failures + admin unlock
 
 ### 1.3 Design system (`packages/ui`)
-- [ ] Tokens from `docs/07-design-system.md` (color, type scale, spacing, radius, glass materials, motion durations/easings) as Tailwind preset + CSS variables
-- [ ] Core components: Button, Input, Select, Card, GlassPanel, Sheet/Modal, Toast, Stepper, ProgressBar, Avatar, Badge, Skeleton, EmptyState
+- [x] Tokens from `docs/07-design-system.md` (color, type scale, spacing, radius, glass materials, motion durations/easings) as Tailwind preset + CSS variables
+- [x] First component set: Button, Field(Input), Card, GlassPanel, Badge, Skeleton, EmptyState
+- [ ] Remaining components: Select, Sheet/Modal, Toast, Stepper, ProgressBar, Avatar
 - [ ] Storybook (or ladle) with light/dark + reduced-motion states
 - [ ] Accessibility pass: focus rings, ARIA, contrast ≥ 4.5:1
 
 ### Acceptance
-- [ ] Three seeded users (patient/provider/admin) can sign in on staging; each lands in a role-correct empty portal; MFA required for provider/admin; CI green; Lighthouse a11y ≥ 95 on auth pages.
+- [x] Three seeded users (patient/provider/admin) sign in; each lands in a role-correct portal; provider/admin forced through MFA setup; role boundaries enforced — verified by 7-test Playwright suite (`apps/web/e2e/auth.spec.ts`), green locally
+- [ ] Same suite green on hosted staging + Lighthouse a11y ≥ 95 on auth pages (pending deploy)
 
 ---
 

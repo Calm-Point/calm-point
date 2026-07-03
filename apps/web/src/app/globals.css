@@ -11,6 +11,9 @@
   --cp-brand: 62 107 92; /* #3E6B5C deep sage */
   --cp-brand-tint: 232 240 236; /* #E8F0EC */
   --cp-accent: 197 138 90; /* #C58A5A warm clay */
+  --cp-positive: 61 129 104; /* #3D8168 */
+  --cp-warn: 185 138 47; /* #B98A2F */
+  --cp-danger: 180 72 62; /* #B4483E */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,6 +25,9 @@
     --cp-brand: 127 184 164; /* #7FB8A4 */
     --cp-brand-tint: 30 43 39; /* #1E2B27 */
     --cp-accent: 217 168 124; /* #D9A87C */
+    --cp-positive: 111 179 154;
+    --cp-warn: 214 172 94;
+    --cp-danger: 224 122 112;
   }
 }
 

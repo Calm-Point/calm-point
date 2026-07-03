@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+env:
+  DATABASE_URL: postgresql://calmpoint:calmpoint@localhost:5432/calmpoint
+  AUTH_SECRET: ci-only-secret-not-used-in-any-deployed-environment
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: calmpoint
+          POSTGRES_PASSWORD: calmpoint
+          POSTGRES_DB: calmpoint
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U calmpoint"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate + migrate
+        run: |
+          pnpm --filter @calm-point/db exec prisma generate
+          pnpm --filter @calm-point/db exec prisma migrate deploy
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Seed smoke test
+        run: pnpm --filter @calm-point/db seed
+
+      - name: Install Playwright browser
+        run: pnpm --filter @calm-point/web exec playwright install --with-deps chromium
+
+      - name: E2E (auth + portals)
+        run: pnpm --filter @calm-point/web exec playwright test
+        env:
+          AUTH_URL: http://localhost:3100

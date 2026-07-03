@@ -10,9 +10,11 @@
     "seed": "tsx seed/index.ts"
   },
   "dependencies": {
+    "@calm-point/shared": "workspace:^",
     "@prisma/client": "^6.2.1"
   },
   "devDependencies": {
+    "@node-rs/argon2": "^2.0.2",
     "prisma": "^6.2.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
