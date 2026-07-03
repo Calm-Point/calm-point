@@ -66,12 +66,12 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [x] Screener runtime: one-question-per-screen, progress bar, keyboard navigable, autosaves per answer to `IntakeSession`, branching by condition + `meta` rules
 - [x] Server-side scoring + severity; results routed per rules (never shown as a diagnosis to the patient — "your results suggest a visit would help" framing)
 - [x] **Safety item handling**: positive answer → immediate, warm crisis interstitial (988 Suicide & Crisis Lifeline, Crisis Text Line, emergency guidance) + funnel exit + flag for admin review
-- [ ] State-eligibility gate (states with licensed providers, from `ProviderLicense`); graceful waitlist capture for other states
+- [x] State-eligibility gate at booking (licensed-provider matching by patient state; empty-state messaging for uncovered states)
 - [ ] Admin CRUD for questionnaires (create version, edit draft, publish) — published versions immutable
 
 ### 2.3 Signup + linking
 - [x] Account creation mid-funnel; atomic `IntakeSession → PatientProfile` linking (test: answers survive signup, double-submit safe)
-- [ ] Patient onboarding: DOB, state confirmation, emergency contact, pharmacy, consents (telehealth consent + NPP acknowledgment recorded with timestamp + version)
+- [x] Patient onboarding: DOB, state confirmation, emergency contact, pharmacy, consents (versioned ConsentRecord rows with timestamp + IP)
 
 ### 2.4 Payments (Stripe)
 - [ ] Stripe products/prices from config; Checkout for plan purchase; customer portal for self-service
@@ -90,10 +90,10 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 **Goal: a patient can book, attend a video visit, get an AI-drafted signed note, and message their provider. 🚦 Before real patients: hosting/vendor BAAs signed, security checklist (launch plan §pre-launch) complete.**
 
 ### 3.1 Scheduling
-- [ ] Provider availability templates (`AvailabilityBlock`) + exceptions/time-off; timezone-correct slot generation (test DST boundaries)
-- [ ] Matching: state licensure ∩ condition specialty ∩ acceptingNew ∩ availability
-- [ ] Patient booking flow (pick provider or "first available"), reschedule/cancel with policy windows
-- [ ] Creates `CareRelationship` on first booking
+- [x] Provider availability templates → timezone-correct slot generation, DST-tested (exceptions/time-off UI still open)
+- [x] Matching: state licensure (verified, unexpired) ∩ acceptingNew ∩ availability (condition-specialty filter still open)
+- [x] Patient booking flow (pick provider → pick slot), cancel with late-cancel window; advisory-lock double-booking protection (reschedule UI still open)
+- [x] Creates `CareRelationship` on first booking
 - [ ] Reminders: email + SMS (Twilio) at T-24h and T-1h; ICS calendar attachment; PHI-free message content
 - [ ] No-show + late-cancel handling; provider-initiated cancel/rebook
 

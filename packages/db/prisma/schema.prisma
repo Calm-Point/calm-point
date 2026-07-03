@@ -107,8 +107,24 @@ model PatientProfile {
   subscriptions     Subscription[]
   clinicalNotes     ClinicalNote[]
   aiTherapySessions AiTherapySession[]
+  consents          ConsentRecord[]
 
   @@index([stateOfResidence])
+}
+
+// Versioned consent capture (telehealth consent, NPP acknowledgment, scribe
+// consent defaults). Legal requires exactly which text version was accepted.
+model ConsentRecord {
+  id         String   @id @default(cuid())
+  patientId  String
+  docKey     String // "telehealth-consent" | "hipaa-npp" | "terms" | "privacy"
+  docVersion String // e.g. "2026-07-draft"
+  acceptedAt DateTime @default(now())
+  ip         String?
+  patient    PatientProfile @relation(fields: [patientId], references: [id])
+
+  @@unique([patientId, docKey, docVersion])
+  @@index([patientId])
 }
 
 model ProviderProfile {

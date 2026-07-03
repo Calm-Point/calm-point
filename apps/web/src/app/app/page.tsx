@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { prisma } from "@calm-point/db";
 import { Card, CardTitle, CardDescription, EmptyState } from "@calm-point/ui";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
@@ -14,6 +15,12 @@ export default async function PatientDashboard() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
+  const profile = await prisma.patientProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { onboardingCompletedAt: true },
+  });
+  const needsOnboarding = !profile?.onboardingCompletedAt;
+
   return (
     <PortalShell
       title={`Good to see you, ${session.user.name?.split(" ")[0] ?? "there"}`}
@@ -21,11 +28,24 @@ export default async function PatientDashboard() {
       roleLabel="Patient"
       nav={NAV}
     >
+      {needsOnboarding ? (
+        <a
+          href="/app/onboarding"
+          className="mb-6 block rounded-lg bg-brand p-5 text-white shadow-soft transition-transform hover:-translate-y-0.5"
+        >
+          <p className="font-semibold">Finish setting up your care →</p>
+          <p className="text-sm opacity-90">
+            A few details (2 minutes) unlock booking your first visit.
+          </p>
+        </a>
+      ) : null}
       <div className="grid gap-6 sm:grid-cols-2">
         <Card>
           <CardTitle className="mb-1 text-lg">Next appointment</CardTitle>
           <CardDescription>
-            Booking opens in Phase 3 — scheduling, video visits, and reminders.
+            <a href="/app/appointments" className="text-brand underline">
+              Book or manage your visits →
+            </a>
           </CardDescription>
         </Card>
         <Card>
