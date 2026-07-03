@@ -55,22 +55,22 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 **Goal: the complete ad-click → screener → signup → (stub) booking funnel. This is the revenue path — highest polish bar on web.**
 
 ### 2.1 Marketing site `(marketing)`
-- [ ] Landing page system: shared template + per-condition pages (`/adhd`, `/anxiety`, `/depression`, `/weight-loss`, `/sleep`) with condition-specific copy, pricing, provider credentials, FAQ, testimonials placeholder
+- [x] Landing page system: shared template + per-condition pages (`/adhd`, `/anxiety`, `/depression`, `/weight-loss`, `/sleep`) with condition-specific copy, pricing, provider credentials, FAQ, testimonials placeholder
 - [ ] Home, How-it-works, Pricing, About, Contact
-- [ ] Legal pages: Privacy Policy, Terms, Telehealth Consent, HIPAA Notice of Privacy Practices (🚦 legal review before launch — templates drafted now)
-- [ ] SEO: metadata, OpenGraph, sitemap, robots; static/ISR rendering; LCP < 1.8s on 4G
-- [ ] UTM capture → `IntakeSession.utm`; consent-gated marketing pixels on marketing pages ONLY (per compliance §tracking)
+- [x] Legal pages: Privacy Policy, Terms, Telehealth Consent, HIPAA Notice of Privacy Practices (🚦 legal review before launch — templates drafted now)
+- [x] SEO: metadata, OpenGraph, sitemap, robots; static/ISR rendering; LCP < 1.8s on 4G
+- [x] UTM capture → `IntakeSession.utm` (pixels deferred until analytics vendor + consent banner land)
 
 ### 2.2 Questionnaire engine
-- [ ] Seed PHQ-9, GAD-7, ASRS v1.1, intake-core content + `ScoringRule` rows (unit tests assert canonical cutoffs)
-- [ ] Screener runtime: one-question-per-screen, progress bar, keyboard navigable, autosaves per answer to `IntakeSession`, branching by condition + `meta` rules
-- [ ] Server-side scoring + severity; results routed per rules (never shown as a diagnosis to the patient — "your results suggest a visit would help" framing)
-- [ ] **Safety item handling**: positive answer → immediate, warm crisis interstitial (988 Suicide & Crisis Lifeline, Crisis Text Line, emergency guidance) + funnel exit + flag for admin review
+- [x] Seed PHQ-9, GAD-7, ASRS v1.1, intake-core content + `ScoringRule` rows (unit tests assert canonical cutoffs)
+- [x] Screener runtime: one-question-per-screen, progress bar, keyboard navigable, autosaves per answer to `IntakeSession`, branching by condition + `meta` rules
+- [x] Server-side scoring + severity; results routed per rules (never shown as a diagnosis to the patient — "your results suggest a visit would help" framing)
+- [x] **Safety item handling**: positive answer → immediate, warm crisis interstitial (988 Suicide & Crisis Lifeline, Crisis Text Line, emergency guidance) + funnel exit + flag for admin review
 - [ ] State-eligibility gate (states with licensed providers, from `ProviderLicense`); graceful waitlist capture for other states
 - [ ] Admin CRUD for questionnaires (create version, edit draft, publish) — published versions immutable
 
 ### 2.3 Signup + linking
-- [ ] Account creation mid-funnel; atomic `IntakeSession → PatientProfile` linking (test: answers survive signup, double-submit safe)
+- [x] Account creation mid-funnel; atomic `IntakeSession → PatientProfile` linking (test: answers survive signup, double-submit safe)
 - [ ] Patient onboarding: DOB, state confirmation, emergency contact, pharmacy, consents (telehealth consent + NPP acknowledgment recorded with timestamp + version)
 
 ### 2.4 Payments (Stripe)
@@ -79,7 +79,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [ ] Test-mode E2E: card success, decline, cancel, past-due
 
 ### Acceptance
-- [ ] Playwright: full funnel (landing → screener → safety branch test → signup → pay test-mode → onboarding) green in CI
+- [x] Playwright: funnel E2E green (landing → screener → safety-branch divert → signup with intake linking); pay + onboarding steps pending Stripe keys
 - [ ] Funnel analytics events firing (PostHog): page → start → complete → signup → paid, with UTM attribution
 - [ ] Crisis path verified by manual QA script; a11y audit of screener passes
 

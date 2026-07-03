@@ -1,10 +1,14 @@
-/** Condition funnels — each maps to a landing page + screener flow. */
+/**
+ * Condition funnels — each maps to a landing page; screener is the validated
+ * instrument slug, or null when the funnel goes straight to signup (a proper
+ * instrument for those conditions is tracked in the build plan).
+ */
 export const CONDITIONS = [
   { slug: "adhd", label: "ADHD", screener: "asrs-v1.1" },
   { slug: "anxiety", label: "Anxiety", screener: "gad-7" },
   { slug: "depression", label: "Depression", screener: "phq-9" },
-  { slug: "weight-loss", label: "Weight management", screener: "intake-weight" },
-  { slug: "sleep", label: "Sleep & insomnia", screener: "intake-sleep" },
+  { slug: "weight-loss", label: "Weight management", screener: null },
+  { slug: "sleep", label: "Sleep & insomnia", screener: null },
 ] as const;
 
 export type ConditionSlug = (typeof CONDITIONS)[number]["slug"];
