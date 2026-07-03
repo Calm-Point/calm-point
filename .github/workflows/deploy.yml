@@ -1,0 +1,54 @@
+name: Deploy
+
+# Deploys apps/web to Vercel on every push to the default branch.
+# Activates automatically once three repo secrets exist (Settings → Secrets):
+#   VERCEL_TOKEN      — vercel.com/account/tokens
+#   VERCEL_ORG_ID     — team_CWFHuApyeVOOzrPcMa3XZmbO (johnmatveyev-lab)
+#   VERCEL_PROJECT_ID — the Vercel project to deploy into
+# Until then the job skips cleanly. Runtime env (DATABASE_URL, AUTH_SECRET,
+# AUTH_URL) is configured on the Vercel project itself — see docs/09-deployment.md.
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deploy credentials
+        id: creds
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::VERCEL_TOKEN secret not set — skipping deploy (see docs/09-deployment.md)"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.creds.outputs.ready == 'true'
+
+      - uses: pnpm/action-setup@v4
+        if: steps.creds.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Deploy to Vercel
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN" > deploy-url.txt
+          echo "Deployed: $(cat deploy-url.txt)"
+          echo "### Deployed → $(cat deploy-url.txt)" >> "$GITHUB_STEP_SUMMARY"

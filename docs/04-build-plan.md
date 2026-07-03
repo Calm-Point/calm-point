@@ -22,7 +22,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 ### 1.1 Infrastructure
 - [x] `docker-compose.yml` for local Postgres; `pnpm db:migrate` + seed pipeline working
 - [x] GitHub Actions CI: lint, typecheck, unit tests, integration tests (Postgres service container), build
-- [ ] Deploy `apps/web` to hosting (Vercel to start; 🚦 confirm BAA-capable plan before any real PHI — see architecture D-hosting)
+- [x] Deploy pipeline ready: production Postgres LIVE on Supabase (migrated + seeded, isolated calm_point schema) + auto-deploy workflow (.github/workflows/deploy.yml); one-time Vercel credential step documented in docs/09-deployment.md 🚦 BAA before real PHI
 - [ ] Staging + production environments, secret management, `.env.example` complete
 - [ ] Error tracking (Sentry, PII scrubbing rules) + structured request logging + health endpoint
 
