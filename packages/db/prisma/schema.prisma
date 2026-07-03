@@ -1,0 +1,576 @@
+// Calm Point — data model source of truth.
+// Narrative documentation: docs/03-data-model.md
+// Conventions: cuid ids, createdAt/updatedAt on mutable models, soft-delete only
+// where legally required to retain (clinical records are never hard-deleted).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity & access
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  PATIENT
+  PROVIDER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+model User {
+  id            String     @id @default(cuid())
+  role          Role
+  status        UserStatus @default(ACTIVE)
+  email         String     @unique
+  emailVerified DateTime?
+  passwordHash  String? // null when using OAuth only
+  mfaSecret     String? // encrypted at rest; required for PROVIDER/ADMIN before activation
+  mfaEnabled    Boolean    @default(false)
+  firstName     String
+  lastName      String
+  phone         String?
+  timezone      String     @default("America/New_York")
+  avatarUrl     String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  oauthAccounts       OAuthAccount[]
+  patientProfile      PatientProfile?
+  providerProfile     ProviderProfile?
+  auditEvents         AuditEvent[]         @relation("actor")
+  sentMessages        Message[]
+  messageParticipants MessageParticipant[]
+  notifications       Notification[]
+  aiInteractions      AiInteraction[]
+  devices             Device[]
+
+  @@index([role, status])
+}
+
+model OAuthAccount {
+  id                String @id @default(cuid())
+  userId            String
+  provider          String // "apple" | "google"
+  providerAccountId String
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  userId    String
+  platform  String // "ios" | "android" | "web"
+  pushToken String? // Expo push token; payloads must be PHI-free
+  lastSeen  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Patient & provider profiles
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PatientProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  dateOfBirth     DateTime?
+  stateOfResidence String? // 2-letter code; drives provider matching + eligibility
+  pronouns        String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  pharmacyName    String?
+  pharmacyAddress String?
+  onboardingCompletedAt DateTime?
+  aiTherapistEnabledAt  DateTime? // set only after clinical sign-off (J4 gate)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id])
+  careRelationships CareRelationship[]
+  appointments      Appointment[]
+  responses         QuestionnaireResponse[]
+  intakeSessions    IntakeSession[]
+  subscriptions     Subscription[]
+  clinicalNotes     ClinicalNote[]
+  aiTherapySessions AiTherapySession[]
+
+  @@index([stateOfResidence])
+}
+
+model ProviderProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  npi            String?  @unique
+  credentials    String // "MD" | "DO" | "PMHNP-BC" | "LCSW" ...
+  bio            String?
+  specialties    String[] // condition slugs: "adhd" | "anxiety" | "depression" | "weight" | "sleep"
+  acceptingNew   Boolean  @default(true)
+  videoRoomId    String? // persistent personal room id at the video vendor, if used
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user              User                 @relation(fields: [userId], references: [id])
+  licenses          ProviderLicense[]
+  availability      AvailabilityBlock[]
+  careRelationships CareRelationship[]
+  appointments      Appointment[]
+  clinicalNotes     ClinicalNote[]
+}
+
+model ProviderLicense {
+  id         String    @id @default(cuid())
+  providerId String
+  state      String // 2-letter code
+  licenseNumber String
+  licenseType   String
+  expiresAt  DateTime
+  verifiedAt DateTime? // admin credentialing workflow sets this
+  provider   ProviderProfile @relation(fields: [providerId], references: [id])
+
+  @@unique([providerId, state, licenseNumber])
+  @@index([state, expiresAt])
+}
+
+// Active clinical relationship — the authorization boundary for provider access.
+model CareRelationship {
+  id         String    @id @default(cuid())
+  patientId  String
+  providerId String
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+  patient    PatientProfile  @relation(fields: [patientId], references: [id])
+  provider   ProviderProfile @relation(fields: [providerId], references: [id])
+
+  @@unique([patientId, providerId, startedAt])
+  @@index([providerId, endedAt])
+  @@index([patientId, endedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Questionnaires (data-driven engine — D6)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum QuestionnaireKind {
+  SCREENER    // pre-signup funnel screener
+  INTAKE      // post-signup clinical intake
+  CHECK_IN    // recurring (PHQ-9 cadence etc.)
+  CUSTOM
+}
+
+model Questionnaire {
+  id          String            @id @default(cuid())
+  slug        String // "phq-9" | "gad-7" | "asrs-v1.1" | "intake-core" ...
+  version     Int
+  kind        QuestionnaireKind
+  title       String
+  description String?
+  isPublished Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+
+  questions    Question[]
+  scoringRules ScoringRule[]
+  responses    QuestionnaireResponse[]
+
+  @@unique([slug, version])
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  SCALE
+  TEXT
+  DATE
+  STATE_SELECT
+}
+
+model Question {
+  id              String       @id @default(cuid())
+  questionnaireId String
+  order           Int
+  type            QuestionType
+  prompt          String
+  helpText        String?
+  required        Boolean      @default(true)
+  isSafetyItem    Boolean      @default(false) // e.g. C-SSRS-style item → crisis path
+  meta            Json? // branching logic, min/max for scales, etc.
+  questionnaire   Questionnaire  @relation(fields: [questionnaireId], references: [id])
+  options         AnswerOption[]
+  answers         Answer[]
+
+  @@unique([questionnaireId, order])
+}
+
+model AnswerOption {
+  id         String   @id @default(cuid())
+  questionId String
+  order      Int
+  label      String
+  value      Int // numeric value used by scoring
+  question   Question @relation(fields: [questionId], references: [id])
+  answers    Answer[]
+
+  @@unique([questionId, order])
+}
+
+// e.g. PHQ-9: 0-4 minimal, 5-9 mild, 10-14 moderate, 15-19 mod-severe, 20-27 severe
+model ScoringRule {
+  id              String @id @default(cuid())
+  questionnaireId String
+  minScore        Int
+  maxScore        Int
+  severity        String // "minimal" | "mild" | "moderate" | "moderately-severe" | "severe"
+  recommendation  String // routing guidance shown to provider (never auto-diagnosis to patient)
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  @@index([questionnaireId])
+}
+
+// Anonymous pre-auth funnel session (D7). Linked to patient at signup.
+model IntakeSession {
+  id          String   @id @default(cuid())
+  token       String   @unique // httpOnly cookie value
+  conditionSlug String? // which landing page funnel started this
+  utm         Json? // utm_source/medium/campaign for attribution
+  patientId   String? // set at account creation
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  patient     PatientProfile? @relation(fields: [patientId], references: [id])
+  responses   QuestionnaireResponse[]
+
+  @@index([expiresAt])
+}
+
+model QuestionnaireResponse {
+  id              String    @id @default(cuid())
+  questionnaireId String
+  patientId       String? // null while pre-auth (owned by intakeSession)
+  intakeSessionId String?
+  completedAt     DateTime?
+  totalScore      Int?
+  severity        String?
+  flaggedSafety   Boolean   @default(false) // safety item answered positively
+  createdAt       DateTime  @default(now())
+
+  questionnaire Questionnaire  @relation(fields: [questionnaireId], references: [id])
+  patient       PatientProfile? @relation(fields: [patientId], references: [id])
+  intakeSession IntakeSession?  @relation(fields: [intakeSessionId], references: [id])
+  answers       Answer[]
+
+  @@index([patientId, questionnaireId, completedAt])
+}
+
+model Answer {
+  id         String  @id @default(cuid())
+  responseId String
+  questionId String
+  optionId   String?
+  valueText  String? // for TEXT/DATE
+  valueInt   Int?
+  response   QuestionnaireResponse @relation(fields: [responseId], references: [id])
+  question   Question              @relation(fields: [questionId], references: [id])
+  option     AnswerOption?         @relation(fields: [optionId], references: [id])
+
+  @@unique([responseId, questionId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scheduling & visits
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AvailabilityBlock {
+  id         String   @id @default(cuid())
+  providerId String
+  dayOfWeek  Int // 0-6, provider-local recurring template
+  startMin   Int // minutes from midnight, provider tz
+  endMin     Int
+  slotSizeMin Int     @default(30)
+  effectiveFrom DateTime @default(now())
+  effectiveTo   DateTime?
+  provider   ProviderProfile @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, dayOfWeek])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED_PATIENT
+  CANCELLED_PROVIDER
+}
+
+enum AppointmentKind {
+  INITIAL
+  FOLLOW_UP
+  THERAPY
+}
+
+model Appointment {
+  id         String            @id @default(cuid())
+  patientId  String
+  providerId String
+  kind       AppointmentKind
+  status     AppointmentStatus @default(SCHEDULED)
+  startsAt   DateTime
+  endsAt     DateTime
+  cancelReason String?
+  videoVendor  String? // "zoom" | "daily"
+  videoSessionId String? // vendor session/room identifier
+  scribeConsentAt DateTime? // recorded consent to transcription; scribe never runs without it
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  patient    PatientProfile  @relation(fields: [patientId], references: [id])
+  provider   ProviderProfile @relation(fields: [providerId], references: [id])
+  transcript VisitTranscript?
+  note       ClinicalNote?
+  payment    Payment?
+
+  @@index([providerId, startsAt])
+  @@index([patientId, startsAt])
+  @@index([status, startsAt])
+}
+
+model VisitTranscript {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  storageKey    String // S3 key — transcripts stored encrypted in object storage, not in rows
+  language      String   @default("en")
+  durationSec   Int?
+  sttVendor     String // "deepgram" | "aws-transcribe-medical"
+  createdAt     DateTime @default(now())
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+enum NoteStatus {
+  AI_DRAFT
+  IN_REVIEW
+  SIGNED
+  AMENDED
+}
+
+model ClinicalNote {
+  id            String     @id @default(cuid())
+  appointmentId String     @unique
+  patientId     String
+  providerId    String
+  status        NoteStatus @default(AI_DRAFT)
+  // SOAP sections; AI drafts, provider edits, signing locks content
+  subjective    String?
+  objective     String?
+  assessment    String?
+  plan          String?
+  signedAt      DateTime?
+  signedHash    String? // sha256 of content at signing — tamper evidence
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  appointment Appointment     @relation(fields: [appointmentId], references: [id])
+  patient     PatientProfile  @relation(fields: [patientId], references: [id])
+  provider    ProviderProfile @relation(fields: [providerId], references: [id])
+  amendments  NoteAmendment[]
+
+  @@index([patientId, signedAt])
+}
+
+model NoteAmendment {
+  id        String   @id @default(cuid())
+  noteId    String
+  authorId  String // provider userId
+  content   String
+  createdAt DateTime @default(now())
+  note      ClinicalNote @relation(fields: [noteId], references: [id])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Messaging
+// ─────────────────────────────────────────────────────────────────────────────
+
+model MessageThread {
+  id        String   @id @default(cuid())
+  subject   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants MessageParticipant[]
+  messages     Message[]
+
+  @@index([updatedAt])
+}
+
+model MessageParticipant {
+  id         String    @id @default(cuid())
+  threadId   String
+  userId     String
+  lastReadAt DateTime?
+  thread     MessageThread @relation(fields: [threadId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String
+  attachmentKey String? // S3 key
+  attachmentName String?
+  sentAt    DateTime @default(now())
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  sender    User          @relation(fields: [senderId], references: [id])
+
+  @@index([threadId, sentAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Therapist (J4) & AI gateway audit (D8)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum AiEngine {
+  GEMINI_LIVE
+  XAI_VOICE
+  CLAUDE_TEXT
+}
+
+model AiTherapySession {
+  id          String   @id @default(cuid())
+  patientId   String
+  engine      AiEngine
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  summaryKey  String? // S3 key: AI-generated session summary (patient-visible)
+  safetyFlags Json? // crisis detections, escalations triggered
+  patient     PatientProfile @relation(fields: [patientId], references: [id])
+
+  @@index([patientId, startedAt])
+}
+
+// One row per model call through the AI gateway — cost, safety, and audit.
+model AiInteraction {
+  id          String   @id @default(cuid())
+  userId      String?
+  purpose     String // "scribe-soap" | "therapist-text" | "therapist-voice" | "intake-summary" | "safety-check"
+  model       String
+  inputTokens  Int?
+  outputTokens Int?
+  latencyMs   Int?
+  safetyFlag  String? // "crisis" | "self-harm" | "abuse" | null
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([purpose, createdAt])
+  @@index([userId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Billing
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  patientId            String
+  stripeCustomerId     String
+  stripeSubscriptionId String             @unique
+  planKey              String // config-defined plan identifier
+  status               SubscriptionStatus
+  currentPeriodEnd     DateTime
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  patient              PatientProfile @relation(fields: [patientId], references: [id])
+
+  @@index([patientId, status])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  appointmentId         String?       @unique
+  stripePaymentIntentId String        @unique
+  amountCents           Int
+  currency              String        @default("usd")
+  status                PaymentStatus
+  createdAt             DateTime      @default(now())
+  appointment           Appointment?  @relation(fields: [appointmentId], references: [id])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Platform: audit, flags, notifications
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Append-only. No update/delete in application code; DB role should not grant them.
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorId      String?
+  action       String // "note.read" | "note.sign" | "message.send" | "admin.impersonate" ...
+  resourceType String
+  resourceId   String?
+  ip           String?
+  userAgent    String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  actor        User?    @relation("actor", fields: [actorId], references: [id])
+
+  @@index([resourceType, resourceId])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+}
+
+model FeatureFlag {
+  key         String   @id // "ai-therapist" | "erx" | "video-vendor" ...
+  enabled     Boolean  @default(false)
+  value       Json? // variant config, cohort rules
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  channel   NotificationChannel
+  template  String // template key — content rendered from PHI-free templates
+  sentAt    DateTime?
+  readAt    DateTime?
+  meta      Json?
+  createdAt DateTime            @default(now())
+  user      User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}

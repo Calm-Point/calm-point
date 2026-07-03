@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* "Calm Glass" tokens — docs/07-design-system.md §2 */
+:root {
+  --cp-bg: 247 246 243; /* #F7F6F3 warm paper */
+  --cp-surface: 255 255 255;
+  --cp-ink: 28 30 38; /* #1C1E26 */
+  --cp-ink-soft: 90 94 107; /* #5A5E6B */
+  --cp-brand: 62 107 92; /* #3E6B5C deep sage */
+  --cp-brand-tint: 232 240 236; /* #E8F0EC */
+  --cp-accent: 197 138 90; /* #C58A5A warm clay */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cp-bg: 15 17 21; /* #0F1115 */
+    --cp-surface: 23 26 33; /* #171A21 */
+    --cp-ink: 242 241 236; /* #F2F1EC */
+    --cp-ink-soft: 155 160 173; /* #9BA0AD */
+    --cp-brand: 127 184 164; /* #7FB8A4 */
+    --cp-brand-tint: 30 43 39; /* #1E2B27 */
+    --cp-accent: 217 168 124; /* #D9A87C */
+  }
+}
+
+body {
+  @apply bg-bg text-ink antialiased;
+}
