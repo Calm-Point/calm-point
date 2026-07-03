@@ -4,13 +4,7 @@ import { Card, CardTitle, CardDescription } from "@calm-point/ui";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
 
-const NAV = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/providers", label: "Providers" },
-  { href: "/admin/audit", label: "Audit log" },
-  { href: "/admin/flags", label: "Flags" },
-];
+import { ADMIN_NAV as NAV } from "./admin-nav";
 
 export default async function AdminDashboard() {
   const session = await auth();

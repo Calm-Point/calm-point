@@ -1,0 +1,20 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { PortalShell } from "@/components/portal-shell";
+import { ADMIN_NAV } from "../admin-nav";
+import { UsersClient } from "./users-client";
+
+export default async function AdminUsersPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  return (
+    <PortalShell
+      title="Users"
+      userName={session.user.name ?? ""}
+      roleLabel="Admin"
+      nav={ADMIN_NAV}
+    >
+      <UsersClient />
+    </PortalShell>
+  );
+}

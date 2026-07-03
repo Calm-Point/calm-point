@@ -1,10 +1,30 @@
 import { expect, test } from "@playwright/test";
+import { PrismaClient } from "@prisma/client";
 
 // Phase 1 acceptance (docs/04 §1): seeded users sign in and land in
 // role-correct portals; provider/admin are forced through MFA setup;
 // role boundaries redirect rather than leak.
 
 const PASSWORD = "CalmPoint-Dev-2026!";
+
+// Other specs (admin/messaging/visit) enroll MFA on these fixtures — reset so
+// the "forced into MFA setup" assertions hold on every run.
+test.beforeAll(async () => {
+  const prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url:
+          process.env.DATABASE_URL ??
+          "postgresql://calmpoint:calmpoint@localhost:5432/calmpoint",
+      },
+    },
+  });
+  await prisma.user.updateMany({
+    where: { email: { in: ["admin@calmpoint.dev", "provider@calmpoint.dev"] } },
+    data: { mfaEnabled: false, mfaSecret: null },
+  });
+  await prisma.$disconnect();
+});
 
 async function login(page: import("@playwright/test").Page, email: string) {
   await page.goto("/login");

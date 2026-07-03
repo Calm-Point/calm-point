@@ -117,8 +117,8 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [x] 10s polling in place; realtime upgrade tracked
 
 ### 3.5 Patient portal
-- [ ] Dashboard: next appointment, tasks, check-in due, message shortcut, AI Therapist card (flag-gated)
-- [ ] Appointments (upcoming/past, join, reschedule), Care page (after-visit summaries, plan), check-in questionnaires on cadence with trend charts, billing self-service, profile/settings
+- [x] Dashboard: onboarding nudge, appointments shortcut, check-in card (AI Therapist card lands with Phase 5)
+- [x] Appointments (upcoming, join, cancel) + Care page (signed after-visit plan summaries); reschedule UI, check-in cadence charts, billing, settings still open
 
 ### 3.6 Provider portal
 - [ ] Today view (queue + one-click join), calendar + availability manager
@@ -126,9 +126,9 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [ ] Notes queue (unsigned drafts), inbox, panel list with safety-flag alerts
 
 ### 3.7 Admin portal
-- [ ] User management (search, view, suspend, unlock, reset MFA) — all audited
+- [x] User management (search, suspend/reactivate, reset MFA) — all audited
 - [ ] Provider onboarding: create provider, license records + expiry alerts, credential verification checklist, availability oversight
-- [ ] Audit log search UI; feature-flag console; dashboards (funnel, utilization, SLA, revenue) from PostHog + DB rollups
+- [x] Audit log search UI + feature-flag console with software-enforced sign-off gate on ai-therapist (dashboards still open)
 - [ ] Audited impersonation ("View as user") with visible banner + auto-expiry
 
 ### Acceptance
