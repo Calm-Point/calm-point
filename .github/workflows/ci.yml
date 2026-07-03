@@ -8,6 +8,11 @@ on:
 env:
   DATABASE_URL: postgresql://calmpoint:calmpoint@localhost:5432/calmpoint
   AUTH_SECRET: ci-only-secret-not-used-in-any-deployed-environment
+  # Test-mode opt-ins: dev video vendor, local blob storage, mock AI (no PHI,
+  # no vendors in CI). Real deployments must never set these.
+  ALLOW_DEV_VIDEO: "1"
+  ALLOW_LOCAL_STORAGE: "1"
+  ALLOW_MOCK_AI: "1"
 
 jobs:
   verify:

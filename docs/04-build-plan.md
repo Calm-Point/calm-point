@@ -98,16 +98,16 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [ ] No-show + late-cancel handling; provider-initiated cancel/rebook
 
 ### 3.2 Video visits
-- [ ] `VideoProvider` interface; **Zoom Video SDK** implementation (server-issued session tokens, never client-side secrets); Daily.co implementation behind flag as fallback
+- [x] `VideoProvider` interface; Zoom Video SDK JWT implementation + Daily.co implementation (flag-selected); dev vendor for local/CI — real-vendor keys + BAA still required 🚦
 - [ ] Pre-join device check (camera/mic/permissions), waiting room, in-visit UI (mute, camera, leave, connection quality indicator)
-- [ ] Visit lifecycle: `SCHEDULED → IN_PROGRESS → COMPLETED` driven by join/leave events + webhooks
+- [x] Visit lifecycle `SCHEDULED → IN_PROGRESS → COMPLETED` (join/complete endpoints; vendor webhooks still open)
 - [ ] 🚦 Zoom (or Daily) BAA signed before production visits
 
 ### 3.3 AI Scribe
-- [ ] Consent step at visit start (both parties; recorded to `Appointment.scribeConsentAt`; scribe hard-disabled without it)
-- [ ] Audio → Deepgram streaming STT → transcript assembled server-side → encrypted S3 (`VisitTranscript`)
-- [ ] Claude SOAP-draft generation via AI gateway (purpose `scribe-soap`); draft attached as `ClinicalNote(AI_DRAFT)`
-- [ ] Provider note editor: section-by-section edit, diff vs. AI draft, **sign** (locks + hashes), amendments
+- [x] Consent step at visit start (recorded to `Appointment.scribeConsentAt`; transcript ingest hard-refuses without it)
+- [x] Transcript ingest pipeline → storage seam (`VisitTranscript`); Deepgram streaming + S3 land with vendor keys (local blob store for dev/CI)
+- [x] Claude SOAP-draft generation via AI gateway (purpose `scribe-soap`, faithfulness rules in system prompt, AiInteraction logging); deterministic mock in dev/CI
+- [x] Provider note editor: section-by-section edit, sign (locks + sha256 hash, API refuses post-sign edits); diff view + amendments UI still open
 - [ ] Eval set: ≥ 20 synthetic visit transcripts → SOAP drafts rated for faithfulness (no hallucinated meds/symptoms — automated Claude-as-judge + human spot check) 🚦 clinical reviewer approves quality bar before scribe defaults on
 
 ### 3.4 Messaging

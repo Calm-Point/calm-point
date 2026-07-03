@@ -133,6 +133,9 @@ export function AppointmentsClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge tone="brand">{a.status.toLowerCase()}</Badge>
+                  <Button size="sm" onClick={() => (window.location.href = `/app/visit/${a.id}`)}>
+                    Join
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => cancel(a.id)}>
                     Cancel
                   </Button>

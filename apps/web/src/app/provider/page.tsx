@@ -71,9 +71,17 @@ export default async function ProviderDashboard() {
                       {a.kind === "INITIAL" ? "First visit" : "Follow-up"}
                     </p>
                   </div>
-                  <Badge tone={a.status === "IN_PROGRESS" ? "positive" : "brand"}>
-                    {a.status.replace("_", " ").toLowerCase()}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge tone={a.status === "IN_PROGRESS" ? "positive" : "brand"}>
+                      {a.status.replace("_", " ").toLowerCase()}
+                    </Badge>
+                    <a
+                      href={`/provider/visit/${a.id}`}
+                      className="rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white"
+                    >
+                      {a.status === "IN_PROGRESS" ? "Rejoin" : "Start"}
+                    </a>
+                  </div>
                 </Card>
               ))}
             </div>
