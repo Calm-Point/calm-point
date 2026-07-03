@@ -111,10 +111,10 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [ ] Eval set: ≥ 20 synthetic visit transcripts → SOAP drafts rated for faithfulness (no hallucinated meds/symptoms — automated Claude-as-judge + human spot check) 🚦 clinical reviewer approves quality bar before scribe defaults on
 
 ### 3.4 Messaging
-- [ ] Threads, send/receive, attachments (signed-URL upload, AV scan or type/size allowlist), read receipts
-- [ ] Provider inbox with SLA ordering (oldest unanswered first, SLA timer badge)
+- [x] Threads, send/receive, read receipts along active CareRelationships (attachments still open — needs S3)
+- [x] Provider inbox (recency-ordered, unread badges; SLA timers still open)
 - [ ] Notifications: in-app + PHI-free push/email ("New message from your care team")
-- [ ] Start with 10s SWR polling; upgrade to realtime (Pusher/Ably w/ BAA or WS) when UX demands
+- [x] 10s polling in place; realtime upgrade tracked
 
 ### 3.5 Patient portal
 - [ ] Dashboard: next appointment, tasks, check-in due, message shortcut, AI Therapist card (flag-gated)

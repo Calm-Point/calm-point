@@ -81,6 +81,47 @@ async function seedUsers() {
     },
   });
 
+  // Second provider — dedicated to E2E flows that enroll MFA (messaging.spec)
+  // so the primary provider keeps a clean no-MFA state for auth.spec.
+  const provider2 = await prisma.user.upsert({
+    where: { email: "provider2@calmpoint.dev" },
+    update: {},
+    create: {
+      role: "PROVIDER",
+      email: "provider2@calmpoint.dev",
+      emailVerified: new Date(),
+      passwordHash,
+      firstName: "Sam",
+      lastName: "Chen",
+      providerProfile: {
+        create: {
+          credentials: "MD",
+          specialties: ["depression", "sleep"],
+          bio: "Psychiatrist focused on mood and sleep. Warm, evidence-based care.",
+          licenses: {
+            create: [
+              {
+                state: "NY",
+                licenseNumber: "NY-DEV-000002",
+                licenseType: "MD",
+                expiresAt: new Date("2028-01-01"),
+                verifiedAt: new Date(),
+              },
+            ],
+          },
+          availability: {
+            create: [0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
+              dayOfWeek,
+              startMin: 8 * 60,
+              endMin: 18 * 60,
+              slotSizeMin: 30,
+            })),
+          },
+        },
+      },
+    },
+  });
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@calmpoint.dev" },
     update: {},
@@ -94,7 +135,7 @@ async function seedUsers() {
     },
   });
 
-  return { patient, provider, admin };
+  return { patient, provider, provider2, admin };
 }
 
 async function seedQuestionnaires() {
