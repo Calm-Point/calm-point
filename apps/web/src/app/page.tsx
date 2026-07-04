@@ -28,6 +28,14 @@ export default function HomePage() {
             Sign in
           </a>
         </div>
+        <nav className="flex gap-5 text-sm text-ink-soft">
+          <a href="/how-it-works" className="hover:text-ink hover:underline">
+            How it works
+          </a>
+          <a href="/pricing" className="hover:text-ink hover:underline">
+            Pricing
+          </a>
+        </nav>
       </section>
 
       <section id="conditions" className="mx-auto max-w-3xl px-6 pb-24">

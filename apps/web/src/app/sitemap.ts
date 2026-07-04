@@ -6,6 +6,8 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://calmpoint.example";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: BASE, changeFrequency: "weekly", priority: 1 },
+    { url: `${BASE}/how-it-works`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/pricing`, changeFrequency: "monthly", priority: 0.7 },
     ...CONDITIONS.map((c) => ({
       url: `${BASE}/${c.slug}`,
       changeFrequency: "weekly" as const,

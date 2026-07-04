@@ -56,7 +56,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 
 ### 2.1 Marketing site `(marketing)`
 - [x] Landing page system: shared template + per-condition pages (`/adhd`, `/anxiety`, `/depression`, `/weight-loss`, `/sleep`) with condition-specific copy, pricing, provider credentials, FAQ, testimonials placeholder
-- [ ] Home, How-it-works, Pricing, About, Contact
+- [x] Home, How-it-works, Pricing (static, in sitemap); About/Contact still open
 - [x] Legal pages: Privacy Policy, Terms, Telehealth Consent, HIPAA Notice of Privacy Practices (🚦 legal review before launch — templates drafted now)
 - [x] SEO: metadata, OpenGraph, sitemap, robots; static/ISR rendering; LCP < 1.8s on 4G
 - [x] UTM capture → `IntakeSession.utm` (pixels deferred until analytics vendor + consent banner land)
