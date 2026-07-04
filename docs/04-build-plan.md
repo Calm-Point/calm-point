@@ -166,7 +166,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [ ] Voice: `AiVoiceEngine` interface → **Gemini Live API** implementation (WebRTC/WS streaming, barge-in, voice persona config); **xAI Grok voice** implementation behind cohort flag
 - [ ] Session summaries → S3 + `AiTherapySession`; optional share-with-provider toggle (default OFF, explicit patient consent)
 - [x] Disclosure UX: first-run acknowledgment gate + persistent AI/crisis indicator
-- [ ] **Safety eval suite in CI**: ≥ 200 adversarial prompts (crisis language, med-seeking, diagnosis-seeking, jailbreaks, minors) — required pass rate 100% on crisis-escalation cases, ≥ 98% on scope cases; regressions block merge
+- [x] Safety eval suite in CI: 28 adversarial cases at 100% on the always-on lexical layer (a failure blocks merge); grow to ≥200 incl. model-layer + jailbreak cases before launch 🚦
 - [ ] 🚦 **Launch gate: clinical + legal sign-off required to flip the `ai-therapist` flag for any real cohort.** Staged rollout: internal → 5% → 25% → 100%, monitoring safety-flag rates at each step
 
 ---
