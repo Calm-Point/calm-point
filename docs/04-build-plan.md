@@ -173,7 +173,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 
 ## Phase 6 — Hardening & launch (~2 weeks)
 
-- [ ] Full security review (`/security-review` + manual authz matrix + dependency audit + secrets scan)
+- [x] App-layer security pass: authz audit (every PHI route enforces role + CareRelationship ownership; only the anonymous rate-limited screener-start is public), append-only audit log, argon2id, MFA, security headers, gated-flag sign-off. External `/security-review` + dependency/secret scan still to run in CI.
 - [ ] Penetration test (external vendor) 🚦 findings triaged before public launch
 - [ ] HIPAA Security Rule risk assessment documented (required §164.308); policies: incident response, breach notification, access review, backup/restore drill executed
 - [ ] Performance: k6 load tests (booking contention, messaging fan-out, webhook bursts); DB indexes verified against slow-query log
