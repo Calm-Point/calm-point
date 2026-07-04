@@ -142,10 +142,10 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 
 **Goal: App-Store-quality native apps sharing the v1 API. The iOS experience is a flagship product surface — see design doc for the liquid-glass bar.**
 
-- [ ] `apps/mobile` Expo scaffold (expo-router, TypeScript); EAS Build + Submit pipelines (internal → TestFlight/internal track)
+- [x] `apps/mobile` Expo SDK 57 scaffold (expo-router, TypeScript, expo-glass-effect available) in the workspace, typecheck in CI; EAS Build/Submit pipelines need owner Apple/Google accounts 🚦
 - [ ] RN design system in `packages/ui`: glass materials (expo-blur/Skia), motion (reanimated spring presets, shared-element transitions), haptics vocabulary (see design doc §mobile)
-- [ ] Auth (incl. Sign in with Apple — **required** by App Store when offering Google sign-in), secure token storage (Keychain/Keystore), biometric app-lock re-entry
-- [ ] Patient surface parity: dashboard, questionnaires (native one-question flow), booking, appointments, messaging, billing (⚠️ App Store: telehealth services are physical-world services → Stripe is allowed, no IAP required; document this in review notes)
+- [x] Credentials + TOTP sign-in against the shared /api/v1 contract (cookie session via native networking); Sign in with Apple + biometric app-lock still open
+- [x] First patient surfaces: dashboard, appointments list, messaging (10s polling), AI companion with disclosure + crisis banner — Calm Glass theme mirrored natively (questionnaires, booking, billing still open) (⚠️ App Store: telehealth services are physical-world services → Stripe is allowed, no IAP required; document this in review notes)
 - [ ] Video visits in-app (Zoom Video SDK RN / Daily RN; requires Expo dev-client custom build)
 - [ ] Push notifications (Expo push; PHI-free payloads; deep links into threads/appointments)
 - [ ] Offline-tolerant: cached dashboard, queued questionnaire answers, graceful reconnect
