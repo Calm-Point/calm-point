@@ -1,0 +1,502 @@
+<title>Calm Point — Mental health care that meets you where you are</title>
+<meta name="description" content="Licensed providers for ADHD, anxiety, depression and more. A two-minute check-in, a video visit, and real support between appointments." />
+
+<style>
+  :root {
+    --paper: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #fbfaf8;
+    --ink: #1c1e26;
+    --ink-soft: #565a67;
+    --ink-faint: #8b8f9a;
+    --brand: #3e6b5c;
+    --brand-deep: #2f5347;
+    --brand-tint: #e8f0ec;
+    --clay: #c58a5a;
+    --danger: #a8443b;
+    --hairline: rgba(28, 30, 38, 0.08);
+    --glass: rgba(255, 255, 255, 0.66);
+    --shadow-soft: 0 1px 2px rgba(28, 30, 38, 0.04), 0 12px 32px rgba(28, 30, 38, 0.07);
+    --shadow-lift: 0 2px 4px rgba(28, 30, 38, 0.05), 0 22px 48px rgba(28, 30, 38, 0.12);
+    --sans: ui-sans-serif, -apple-system, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, system-ui, sans-serif;
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0f1115;
+      --surface: #171a21;
+      --surface-2: #1c2029;
+      --ink: #f2f1ec;
+      --ink-soft: #a4a9b5;
+      --ink-faint: #767b88;
+      --brand: #7fb8a4;
+      --brand-deep: #9bcbba;
+      --brand-tint: #1e2b27;
+      --clay: #d9a87c;
+      --danger: #e07a70;
+      --hairline: rgba(242, 241, 236, 0.1);
+      --glass: rgba(23, 26, 33, 0.6);
+      --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+      --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.5), 0 22px 48px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #f7f6f3; --surface: #ffffff; --surface-2: #fbfaf8; --ink: #1c1e26;
+    --ink-soft: #565a67; --ink-faint: #8b8f9a; --brand: #3e6b5c; --brand-deep: #2f5347;
+    --brand-tint: #e8f0ec; --clay: #c58a5a; --danger: #a8443b; --hairline: rgba(28,30,38,0.08);
+    --glass: rgba(255,255,255,0.66);
+    --shadow-soft: 0 1px 2px rgba(28,30,38,0.04), 0 12px 32px rgba(28,30,38,0.07);
+    --shadow-lift: 0 2px 4px rgba(28,30,38,0.05), 0 22px 48px rgba(28,30,38,0.12);
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f1115; --surface: #171a21; --surface-2: #1c2029; --ink: #f2f1ec;
+    --ink-soft: #a4a9b5; --ink-faint: #767b88; --brand: #7fb8a4; --brand-deep: #9bcbba;
+    --brand-tint: #1e2b27; --clay: #d9a87c; --danger: #e07a70; --hairline: rgba(242,241,236,0.1);
+    --glass: rgba(23,26,33,0.6);
+    --shadow-soft: 0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.45);
+    --shadow-lift: 0 2px 4px rgba(0,0,0,0.5), 0 22px 48px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.02em; line-height: 1.12; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .wrap { width: 100%; max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ambient breathing field behind hero */
+  .field { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+  .field canvas { width: 100%; height: 100%; display: block; }
+
+  /* top bar */
+  header.bar {
+    position: sticky; top: 0; z-index: 40;
+    backdrop-filter: saturate(1.5) blur(20px);
+    -webkit-backdrop-filter: saturate(1.5) blur(20px);
+    background: var(--glass);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .bar-in { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+  .mark { width: 26px; height: 26px; }
+  .bar-links { display: flex; align-items: center; gap: 22px; font-size: 14.5px; color: var(--ink-soft); }
+  .bar-links a { text-decoration: none; transition: color 0.2s; }
+  .bar-links a:hover { color: var(--ink); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 46px; padding: 0 22px; border-radius: 999px; border: none;
+    font: inherit; font-weight: 600; font-size: 15.5px; cursor: pointer;
+    background: var(--brand); color: #fff; text-decoration: none;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.18s var(--ease), background 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover { background: var(--brand-deep); box-shadow: var(--shadow-lift); }
+  .btn:active { transform: scale(0.97); }
+  .btn.ghost { background: var(--brand-tint); color: var(--brand); box-shadow: none; }
+  .btn.small { height: 40px; padding: 0 18px; font-size: 14.5px; }
+  .btn:focus-visible, a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 3px;
+  }
+
+  /* hero */
+  .hero { position: relative; padding: 84px 0 56px; text-align: center; }
+  .hero .wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .eyebrow {
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--brand); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--brand); opacity: 0.5; }
+  .eyebrow::after { content: ""; width: 22px; height: 1px; background: var(--brand); opacity: 0.5; }
+  .hero h1 { font-size: clamp(38px, 6.2vw, 62px); font-weight: 600; max-width: 15ch; }
+  .hero .lede { font-size: clamp(17px, 2.2vw, 20px); color: var(--ink-soft); max-width: 54ch; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+  .crisis-line { font-size: 13.5px; color: var(--ink-faint); margin-top: 4px; }
+  .crisis-line a { color: var(--brand); font-weight: 600; }
+
+  .conditions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+  .chip {
+    padding: 9px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--hairline);
+    font-size: 14.5px; font-weight: 500; color: var(--ink); box-shadow: var(--shadow-soft);
+    cursor: pointer; transition: transform 0.18s var(--ease), border-color 0.2s, color 0.2s;
+  }
+  .chip:hover { transform: translateY(-2px); border-color: var(--brand); color: var(--brand); }
+
+  section { padding: 46px 0; }
+  .section-label {
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--clay); margin-bottom: 14px;
+  }
+  h2 { font-size: clamp(26px, 3.6vw, 34px); font-weight: 600; }
+
+  /* screener card — the interactive centerpiece */
+  .screener-shell { padding: 8px 0 60px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 24px;
+    box-shadow: var(--shadow-lift); padding: 34px; position: relative; overflow: hidden;
+  }
+  .prog-head { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; color: var(--ink-soft); margin-bottom: 12px; }
+  .prog-head .count { font-variant-numeric: tabular-nums; }
+  .prog { height: 6px; border-radius: 999px; background: var(--hairline); overflow: hidden; }
+  .prog > i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--brand);
+    transition: width 0.5s var(--ease); }
+  .q-help { font-size: 14px; color: var(--ink-faint); margin: 26px 0 6px; }
+  .q-prompt { font-size: clamp(21px, 3vw, 26px); font-weight: 600; line-height: 1.25; margin-bottom: 22px; }
+  .opts { display: flex; flex-direction: column; gap: 11px; }
+  .opt {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    min-height: 58px; padding: 14px 18px; border-radius: 15px; cursor: pointer;
+    background: var(--surface-2); border: 1.5px solid var(--hairline); color: var(--ink);
+    font: inherit; font-size: 16px; font-weight: 500;
+    transition: transform 0.16s var(--ease), border-color 0.18s, background 0.18s;
+  }
+  .opt:hover { border-color: color-mix(in srgb, var(--brand) 40%, var(--hairline)); }
+  .opt:active { transform: scale(0.985); }
+  .opt.sel { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-deep); }
+  .opt .num {
+    flex: none; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center;
+    background: rgba(62,107,92,0.1); color: var(--ink-faint); font-size: 12.5px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .opt.sel .num { background: var(--brand); color: #fff; }
+  .screener-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
+  .link-btn { background: none; border: none; font: inherit; font-size: 14.5px; color: var(--ink-soft);
+    cursor: pointer; padding: 8px 4px; }
+  .link-btn:disabled { opacity: 0.35; cursor: default; }
+  .link-btn:not(:disabled):hover { color: var(--ink); }
+
+  /* result + crisis states share the card */
+  .result { text-align: center; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .result h3 { font-size: clamp(24px, 3.4vw, 30px); font-weight: 600; }
+  .result p { color: var(--ink-soft); max-width: 46ch; }
+  .badge { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; padding: 6px 14px; border-radius: 999px;
+    background: var(--brand-tint); color: var(--brand); }
+  .crisis { text-align: left; display: flex; flex-direction: column; gap: 18px; }
+  .crisis h3 { font-size: clamp(24px, 3.6vw, 32px); font-weight: 600; line-height: 1.18; }
+  .crisis p { color: var(--ink-soft); }
+  .crisis-actions { display: flex; flex-direction: column; gap: 12px; }
+  .crisis-big {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 72px; padding: 16px 22px; border-radius: 16px; text-decoration: none;
+    box-shadow: var(--shadow-soft);
+  }
+  .crisis-big.a1 { background: var(--brand); color: #fff; }
+  .crisis-big.a2 { background: var(--surface-2); color: var(--brand); border: 1.5px solid var(--brand); }
+  .crisis-big .big { font-size: 20px; font-weight: 600; }
+  .crisis-big .sub { font-size: 13px; opacity: 0.85; }
+
+  .fade-in { animation: fade 0.42s var(--ease) both; }
+  @keyframes fade { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } .prog > i { transition: none; } }
+
+  /* steps */
+  .steps { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 720px) { .steps { grid-template-columns: 1fr; } }
+  .step { background: var(--surface); border: 1px solid var(--hairline); border-radius: 18px; padding: 24px;
+    box-shadow: var(--shadow-soft); }
+  .step .n { width: 30px; height: 30px; border-radius: 999px; background: var(--brand-tint); color: var(--brand);
+    display: grid; place-items: center; font-weight: 600; font-size: 14px; margin-bottom: 14px;
+    font-variant-numeric: tabular-nums; }
+  .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .step p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+
+  .trust { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; padding: 20px 0 0;
+    color: var(--ink-faint); font-size: 14px; }
+  .trust b { color: var(--ink); font-weight: 600; }
+
+  footer { border-top: 1px solid var(--hairline); padding: 34px 0 48px; margin-top: 30px;
+    color: var(--ink-faint); font-size: 13.5px; text-align: center; }
+  footer a { color: var(--brand); text-decoration: none; }
+  .disclaimer { max-width: 62ch; margin: 0 auto 14px; line-height: 1.55; }
+
+  .theme-toggle {
+    width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--hairline);
+    background: var(--surface); color: var(--ink-soft); cursor: pointer; display: grid; place-items: center;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--brand); }
+  @media (max-width: 560px) { .bar-links .nav-link { display: none; } }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="12" stroke="var(--brand)" stroke-width="1.5" opacity="0.35"/>
+        <circle cx="13" cy="13" r="6.5" fill="var(--brand)"/>
+      </svg>
+      <span>Calm Point</span>
+    </div>
+    <div class="bar-links">
+      <a class="nav-link" href="#how">How it works</a>
+      <a class="nav-link" href="#screener">Check in</a>
+      <button class="theme-toggle" id="themeBtn" aria-label="Toggle light or dark theme">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="field" aria-hidden="true"><canvas id="fieldCanvas"></canvas></div>
+  <div class="wrap">
+    <span class="eyebrow">Calm Point</span>
+    <h1>Mental health care that meets you where you are</h1>
+    <p class="lede">Licensed providers for ADHD, anxiety, depression and more. A private two-minute check-in, a video visit within days, and real support between appointments.</p>
+    <div class="cta-row">
+      <a class="btn" href="#screener">Start your free check-in</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <p class="crisis-line">Not for emergencies. In crisis, call or text <a href="tel:988">988</a> — the Suicide &amp; Crisis Lifeline is there 24/7.</p>
+    <div class="conditions" id="conditions">
+      <button class="chip" data-c="anxiety">Anxiety</button>
+      <button class="chip" data-c="depression">Depression</button>
+      <button class="chip" data-c="adhd">ADHD</button>
+      <button class="chip" data-c="sleep">Sleep &amp; insomnia</button>
+      <button class="chip" data-c="weight">Weight management</button>
+    </div>
+  </div>
+</div>
+
+<section class="screener-shell" id="screener">
+  <div class="wrap">
+    <div class="section-label">Free check-in · 2 minutes · private</div>
+    <div class="card" id="screenerCard" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-label">How care works</div>
+    <h2 style="margin-bottom:26px">Real clinicians, real plans — no waiting rooms.</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Check in</h3><p>Answer a short, clinically validated questionnaire. It's private, and it helps your provider understand what you're experiencing.</p></div>
+      <div class="step"><div class="n">2</div><h3>Meet your provider</h3><p>Book a video visit — most new patients get in within days. Your provider reviews your check-in before you meet.</p></div>
+      <div class="step"><div class="n">3</div><h3>Feel supported</h3><p>Leave every visit with a clear plan, then message your care team and track your progress between appointments.</p></div>
+    </div>
+    <div class="trust">
+      <span><b>Licensed</b> providers, matched to your state</span>
+      <span><b>HIPAA-first</b> — your data is private, never sold</span>
+      <span><b>No pixels</b> on health pages</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="disclaimer">Calm Point is a technology platform supporting telehealth care delivered by independent licensed providers. The check-in above is an educational screening tool, not a diagnosis. If you may be in danger of harming yourself, call or text <a href="tel:988">988</a> or call 911.</p>
+    <p>© 2026 Calm Point · Privacy · Terms · Telehealth Consent · HIPAA Notice</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---- theme toggle ---- */
+  var root = document.documentElement;
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = root.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+  });
+
+  /* ---- ambient breathing field (canvas, calm, reduced-motion aware) ---- */
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var cv = document.getElementById("fieldCanvas"), ctx = cv.getContext("2d"), t = 0, DPR = Math.min(2, window.devicePixelRatio || 1);
+  function sage() { return getComputedStyle(root).getPropertyValue("--brand").trim() || "#3e6b5c"; }
+  function resize() { cv.width = cv.clientWidth * DPR; cv.height = cv.clientHeight * DPR; }
+  var blobs = [];
+  for (var i = 0; i < 5; i++) blobs.push({ x: Math.random(), y: Math.random(), r: 0.28 + Math.random() * 0.22, p: Math.random() * 6.28, s: 0.4 + Math.random() * 0.5 });
+  function draw() {
+    resize();
+    var w = cv.width, h = cv.height;
+    ctx.clearRect(0, 0, w, h);
+    var col = sage();
+    for (var i = 0; i < blobs.length; i++) {
+      var b = blobs[i];
+      var breathe = reduce ? 1 : 1 + Math.sin(t * 0.0006 * b.s + b.p) * 0.12;
+      var cx = b.x * w, cy = b.y * h * 0.9, rad = b.r * Math.min(w, h) * breathe;
+      var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      g.addColorStop(0, hexA(col, 0.10));
+      g.addColorStop(1, hexA(col, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.2832); ctx.fill();
+    }
+    if (!reduce) { t += 16; requestAnimationFrame(draw); }
+  }
+  function hexA(hex, a) {
+    hex = hex.replace("#", "");
+    if (hex.length === 3) hex = hex.split("").map(function (c) { return c + c; }).join("");
+    var n = parseInt(hex, 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  window.addEventListener("resize", function () { if (reduce) draw(); });
+  draw();
+
+  /* ---- the screener (short, validated-style: GAD-2 + PHQ-2 + a safety item) ---- */
+  var OPTS = ["Not at all", "Several days", "More than half the days", "Nearly every day"];
+  var QUESTIONS = {
+    anxiety: {
+      label: "Anxiety", help: "Over the last 2 weeks, how often have you been bothered by…",
+      items: [
+        "Feeling nervous, anxious, or on edge",
+        "Not being able to stop or control worrying",
+        "Trouble relaxing"
+      ]
+    },
+    depression: {
+      label: "Depression", help: "Over the last 2 weeks, how often have you been bothered by…",
+      items: [
+        "Little interest or pleasure in doing things",
+        "Feeling down, depressed, or hopeless",
+        "Trouble falling asleep, staying asleep, or sleeping too much"
+      ]
+    },
+    adhd: {
+      label: "ADHD", help: "Over the past 6 months, how often…",
+      items: [
+        "Do you have trouble wrapping up the final details of a project?",
+        "Do you have difficulty getting things in order for a task that takes organization?",
+        "Do you have problems remembering appointments or obligations?"
+      ]
+    },
+    sleep: {
+      label: "Sleep", help: "Over the last 2 weeks, how often have you been bothered by…",
+      items: [
+        "Trouble falling asleep or staying asleep",
+        "Feeling tired or having little energy during the day",
+        "Worrying about your sleep as bedtime approaches"
+      ]
+    },
+    weight: {
+      label: "Weight management", help: "Over the last 2 weeks, how often…",
+      items: [
+        "Have you felt your eating was out of your control?",
+        "Have you felt frustrated with your energy or metabolism?",
+        "Has how you feel about your body weighed on your mood?"
+      ]
+    }
+  };
+  // shared safety item appended to every flow
+  var SAFETY = "Thoughts that you would be better off dead, or of hurting yourself in some way";
+
+  var card = document.getElementById("screenerCard");
+  var state = { cond: "anxiety", idx: 0, answers: [] };
+
+  function items() { return QUESTIONS[state.cond].items.concat([SAFETY]); }
+
+  function render() {
+    var qs = items(), total = qs.length, i = state.idx;
+    if (state.done === "crisis") return renderCrisis();
+    if (state.done === "result") return renderResult();
+    var pct = Math.round((i / total) * 100);
+    var isSafety = i === total - 1;
+    card.innerHTML =
+      '<div class="prog-head"><span>' + QUESTIONS[state.cond].label + ' check-in</span>' +
+      '<span class="count">' + (i + 1) + ' of ' + total + '</span></div>' +
+      '<div class="prog"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="fade-in" key="' + i + '">' +
+      '<p class="q-help">' + (isSafety ? "One more — this one matters to us." : QUESTIONS[state.cond].help) + '</p>' +
+      '<p class="q-prompt">' + qs[i] + '</p>' +
+      '<div class="opts" role="radiogroup" aria-label="' + qs[i].replace(/"/g, "") + '">' +
+      OPTS.map(function (o, oi) {
+        var sel = state.answers[i] === oi ? " sel" : "";
+        return '<button class="opt' + sel + '" data-v="' + oi + '" role="radio" aria-checked="' + (sel ? "true" : "false") + '">' +
+          '<span class="num">' + (oi + 1) + '</span>' + o + '</button>';
+      }).join("") +
+      '</div>' +
+      '<div class="screener-foot">' +
+      '<button class="link-btn" id="backBtn"' + (i === 0 ? " disabled" : "") + '>← Back</button>' +
+      '</div></div>';
+
+    Array.prototype.forEach.call(card.querySelectorAll(".opt"), function (el) {
+      el.addEventListener("click", function () { choose(parseInt(el.dataset.v, 10)); });
+    });
+    var back = document.getElementById("backBtn");
+    if (back) back.addEventListener("click", function () { if (state.idx > 0) { state.idx--; render(); } });
+  }
+
+  function choose(v) {
+    var qs = items(), i = state.idx;
+    state.answers[i] = v;
+    var isSafety = i === qs.length - 1;
+    if (isSafety && v > 0) { state.done = "crisis"; return render(); }
+    setTimeout(function () {
+      if (i + 1 < qs.length) { state.idx++; render(); }
+      else { state.done = "result"; render(); }
+    }, 160);
+  }
+
+  function score() {
+    // sum only the clinical items (exclude the safety item from the severity band)
+    var clinical = state.answers.slice(0, items().length - 1);
+    return clinical.reduce(function (a, b) { return a + (b || 0); }, 0);
+  }
+
+  function renderResult() {
+    var s = score(), maxc = (items().length - 1) * 3;
+    var supportive = s <= 2
+      ? { badge: "Low signal", head: "Thanks for checking in.", body: "Your answers don't point to an urgent concern right now — but you know yourself best. A visit can still help you feel your best." }
+      : { badge: "A visit would help", head: "Thank you for sharing.", body: "Your answers suggest that talking with a licensed provider would genuinely help. In the full app, your responses carry into signup and your provider reviews them before your first visit." };
+    card.innerHTML =
+      '<div class="result fade-in">' +
+      '<span class="badge">' + supportive.badge + '</span>' +
+      '<h3>' + supportive.head + '</h3>' +
+      '<p>' + supportive.body + '</p>' +
+      '<p style="font-size:13.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums">Screen total: ' + s + ' / ' + maxc + ' · educational only, not a diagnosis</p>' +
+      '<a class="btn" href="#top" id="restart">Create your account →</a>' +
+      '<button class="link-btn" id="again">Try another check-in</button>' +
+      '</div>';
+    document.getElementById("again").addEventListener("click", reset);
+    document.getElementById("restart").addEventListener("click", function (e) {
+      e.preventDefault();
+      alert("In the full Calm Point app this continues to secure sign-up, where your answers link to your new account and a licensed provider is matched to your state.");
+    });
+  }
+
+  function renderCrisis() {
+    card.innerHTML =
+      '<div class="crisis fade-in">' +
+      '<h3>Thank you for being honest. Let’s get you real support, right now.</h3>' +
+      '<p>Some of what you shared tells us you deserve more immediate care than an online visit can offer today. You’re not alone — free, confidential help is available 24/7 from people who are very good at listening.</p>' +
+      '<div class="crisis-actions">' +
+      '<a class="crisis-big a1" href="tel:988"><span class="big">Call 988</span><span class="sub">Suicide &amp; Crisis Lifeline</span></a>' +
+      '<a class="crisis-big a2" href="sms:741741"><span class="big">Text HOME to 741741</span><span class="sub">Crisis Text Line</span></a>' +
+      '</div>' +
+      '<p style="font-size:14px">If you’re in immediate danger, please call <a href="tel:911" style="color:var(--brand);font-weight:600">911</a> or go to your nearest emergency room.</p>' +
+      '<button class="link-btn" id="again">← Back to the check-in</button>' +
+      '</div>';
+    document.getElementById("again").addEventListener("click", reset);
+  }
+
+  function reset() { state = { cond: state.cond, idx: 0, answers: [] }; render(); }
+
+  Array.prototype.forEach.call(document.querySelectorAll("#conditions .chip"), function (chip) {
+    chip.addEventListener("click", function () {
+      state = { cond: chip.dataset.c, idx: 0, answers: [] };
+      render();
+      document.getElementById("screener").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+  });
+
+  // keyboard 1–4 selects
+  document.addEventListener("keydown", function (e) {
+    if (state.done) return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4) choose(n - 1);
+  });
+
+  render();
+})();
+</script>

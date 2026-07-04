@@ -1,6 +1,18 @@
 # 09 — Deployment
 
-## Current state (updated 2026-07-03)
+## Live now
+
+- **Landing + working check-in funnel (public, shareable):**
+  https://claude.ai/code/artifact/8e84e20d-98d5-4d0d-b7f7-84cdbfaf0f37 —
+  the Calm Point front door (Calm Glass design, both themes) with a live
+  per-condition screener that runs one-question-per-screen, keyboard-navigable,
+  with the real crisis-divert safety path (988 / Crisis Text Line) and
+  non-diagnostic result framing. Source: `apps/web/public/demo/landing.html`.
+  This is the marketing/funnel surface deployed as a self-contained page; the
+  full backend app (auth, DB, booking, video, messaging) deploys to Vercel per
+  the steps below.
+
+## Current state (updated 2026-07-04)
 
 | Piece | Status |
 |---|---|
