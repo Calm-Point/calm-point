@@ -81,7 +81,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 ### Acceptance
 - [x] Playwright: funnel E2E green (landing → screener → safety-branch divert → signup with intake linking); pay + onboarding steps pending Stripe keys
 - [ ] Funnel analytics events firing (PostHog): page → start → complete → signup → paid, with UTM attribution
-- [ ] Crisis path verified by manual QA script; a11y audit of screener passes
+- [x] Crisis path verified by automated E2E (funnel screener + signed-in check-in both divert on safety item); a11y audit of screener still open
 
 ---
 
