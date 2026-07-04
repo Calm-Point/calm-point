@@ -1,0 +1,584 @@
+<title>Calm Point — Mental health care that meets you where you are</title>
+<meta name="description" content="A working demo of the Calm Point telehealth app: check-in, sign up, book a video visit, message your care team, and talk with an AI companion." />
+
+<style>
+  :root {
+    --paper:#f7f6f3; --surface:#fff; --surface-2:#fbfaf8; --ink:#1c1e26; --ink-soft:#565a67;
+    --ink-faint:#8b8f9a; --brand:#3e6b5c; --brand-deep:#2f5347; --brand-tint:#e8f0ec; --clay:#c58a5a;
+    --danger:#a8443b; --positive:#3d8168; --hairline:rgba(28,30,38,.08); --glass:rgba(255,255,255,.66);
+    --shadow-soft:0 1px 2px rgba(28,30,38,.04),0 12px 32px rgba(28,30,38,.07);
+    --shadow-lift:0 2px 4px rgba(28,30,38,.05),0 22px 48px rgba(28,30,38,.12);
+    --sans:ui-sans-serif,-apple-system,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+    --ease:cubic-bezier(.32,.72,0,1);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0f1115;--surface:#171a21;--surface-2:#1c2029;--ink:#f2f1ec;--ink-soft:#a4a9b5;--ink-faint:#767b88;
+    --brand:#7fb8a4;--brand-deep:#9bcbba;--brand-tint:#1e2b27;--clay:#d9a87c;--danger:#e07a70;--positive:#6fb39a;
+    --hairline:rgba(242,241,236,.1);--glass:rgba(23,26,33,.6);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.5),0 22px 48px rgba(0,0,0,.6);
+  }}
+  :root[data-theme="light"]{--paper:#f7f6f3;--surface:#fff;--surface-2:#fbfaf8;--ink:#1c1e26;--ink-soft:#565a67;--ink-faint:#8b8f9a;--brand:#3e6b5c;--brand-deep:#2f5347;--brand-tint:#e8f0ec;--clay:#c58a5a;--danger:#a8443b;--positive:#3d8168;--hairline:rgba(28,30,38,.08);--glass:rgba(255,255,255,.66);--shadow-soft:0 1px 2px rgba(28,30,38,.04),0 12px 32px rgba(28,30,38,.07);--shadow-lift:0 2px 4px rgba(28,30,38,.05),0 22px 48px rgba(28,30,38,.12);}
+  :root[data-theme="dark"]{--paper:#0f1115;--surface:#171a21;--surface-2:#1c2029;--ink:#f2f1ec;--ink-soft:#a4a9b5;--ink-faint:#767b88;--brand:#7fb8a4;--brand-deep:#9bcbba;--brand-tint:#1e2b27;--clay:#d9a87c;--danger:#e07a70;--positive:#6fb39a;--hairline:rgba(242,241,236,.1);--glass:rgba(23,26,33,.6);--shadow-soft:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);--shadow-lift:0 2px 4px rgba(0,0,0,.5),0 22px 48px rgba(0,0,0,.6);}
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{text-wrap:balance;margin:0;letter-spacing:-.02em;line-height:1.15}
+  p{margin:0}
+  a{color:inherit}
+  button{font:inherit}
+  .wrap{width:100%;max-width:940px;margin:0 auto;padding:0 22px}
+  .app-wrap{width:100%;max-width:760px;margin:0 auto;padding:0 20px}
+  .hidden{display:none!important}
+
+  .field{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+  .field canvas{width:100%;height:100%;display:block}
+
+  header.bar{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.5) blur(20px);-webkit-backdrop-filter:saturate(1.5) blur(20px);background:var(--glass);border-bottom:1px solid var(--hairline)}
+  .bar-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:600;cursor:pointer}
+  .mark{width:25px;height:25px}
+  .bar-links{display:flex;align-items:center;gap:16px;font-size:14.5px;color:var(--ink-soft)}
+  .bar-links a,.bar-links button.linkish{text-decoration:none;background:none;border:none;color:var(--ink-soft);cursor:pointer;transition:color .2s}
+  .bar-links a:hover,.bar-links button.linkish:hover{color:var(--ink)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;border:none;font-weight:600;font-size:15.5px;cursor:pointer;background:var(--brand);color:#fff;text-decoration:none;box-shadow:var(--shadow-soft);transition:transform .18s var(--ease),background .2s,box-shadow .2s}
+  .btn:hover{background:var(--brand-deep);box-shadow:var(--shadow-lift)}
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:var(--brand-tint);color:var(--brand);box-shadow:none}
+  .btn.small{height:38px;padding:0 16px;font-size:14px}
+  .btn.block{width:100%}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .btn:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .theme-toggle{width:36px;height:36px;border-radius:999px;border:1px solid var(--hairline);background:var(--surface);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center}
+  .theme-toggle:hover{color:var(--ink);border-color:var(--brand)}
+
+  .demo-tag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay);border:1px solid var(--clay);border-radius:999px;padding:3px 9px}
+
+  /* hero */
+  .hero{position:relative;padding:76px 0 46px;text-align:center}
+  .hero .wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px}
+  .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);display:inline-flex;align-items:center;gap:8px}
+  .eyebrow::before,.eyebrow::after{content:"";width:20px;height:1px;background:var(--brand);opacity:.5}
+  .hero h1{font-size:clamp(36px,6vw,58px);font-weight:600;max-width:15ch}
+  .hero .lede{font-size:clamp(16.5px,2.1vw,19px);color:var(--ink-soft);max-width:52ch}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .crisis-line{font-size:13px;color:var(--ink-faint);margin-top:2px}
+  .crisis-line a{color:var(--brand);font-weight:600}
+  .conditions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:8px}
+  .chip{padding:9px 15px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline);font-size:14px;font-weight:500;color:var(--ink);box-shadow:var(--shadow-soft);cursor:pointer;transition:transform .18s var(--ease),border-color .2s,color .2s}
+  .chip:hover{transform:translateY(-2px);border-color:var(--brand);color:var(--brand)}
+
+  section{padding:40px 0}
+  .section-label{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);margin-bottom:12px}
+  h2{font-size:clamp(24px,3.4vw,32px);font-weight:600}
+
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:22px;box-shadow:var(--shadow-lift);padding:30px;position:relative;overflow:hidden}
+  .card.flat{box-shadow:var(--shadow-soft);border-radius:18px;padding:22px}
+
+  /* screener */
+  .prog-head{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;color:var(--ink-soft);margin-bottom:11px}
+  .prog-head .count{font-variant-numeric:tabular-nums}
+  .prog{height:6px;border-radius:999px;background:var(--hairline);overflow:hidden}
+  .prog>i{display:block;height:100%;width:0;border-radius:999px;background:var(--brand);transition:width .5s var(--ease)}
+  .q-help{font-size:14px;color:var(--ink-faint);margin:24px 0 6px}
+  .q-prompt{font-size:clamp(20px,3vw,25px);font-weight:600;line-height:1.25;margin-bottom:20px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;min-height:56px;padding:13px 17px;border-radius:14px;cursor:pointer;background:var(--surface-2);border:1.5px solid var(--hairline);color:var(--ink);font-size:15.5px;font-weight:500;transition:transform .16s var(--ease),border-color .18s,background .18s}
+  .opt:hover{border-color:color-mix(in srgb,var(--brand) 40%,var(--hairline))}
+  .opt:active{transform:scale(.985)}
+  .opt.sel{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-deep)}
+  .opt .num{flex:none;width:25px;height:25px;border-radius:999px;display:grid;place-items:center;background:rgba(62,107,92,.1);color:var(--ink-faint);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+  .opt.sel .num{background:var(--brand);color:#fff}
+  .screener-foot{display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+  .link-btn{background:none;border:none;font-size:14.5px;color:var(--ink-soft);cursor:pointer;padding:8px 4px}
+  .link-btn:disabled{opacity:.35;cursor:default}
+  .link-btn:not(:disabled):hover{color:var(--ink)}
+  .result{text-align:center;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .result h3{font-size:clamp(23px,3.4vw,29px);font-weight:600}
+  .result p{color:var(--ink-soft);max-width:46ch}
+  .badge{font-size:12.5px;font-weight:600;padding:5px 13px;border-radius:999px;background:var(--brand-tint);color:var(--brand)}
+  .badge.warn{background:color-mix(in srgb,var(--clay) 18%,transparent);color:var(--clay)}
+  .badge.pos{background:color-mix(in srgb,var(--positive) 16%,transparent);color:var(--positive)}
+  .crisis{text-align:left;display:flex;flex-direction:column;gap:16px}
+  .crisis h3{font-size:clamp(23px,3.6vw,31px);font-weight:600;line-height:1.18}
+  .crisis p{color:var(--ink-soft)}
+  .crisis-actions{display:flex;flex-direction:column;gap:11px}
+  .crisis-big{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:70px;padding:15px 21px;border-radius:15px;text-decoration:none;box-shadow:var(--shadow-soft)}
+  .crisis-big.a1{background:var(--brand);color:#fff}
+  .crisis-big.a2{background:var(--surface-2);color:var(--brand);border:1.5px solid var(--brand)}
+  .crisis-big .big{font-size:19px;font-weight:600}
+  .crisis-big .sub{font-size:12.5px;opacity:.85}
+
+  /* forms */
+  .form{display:flex;flex-direction:column;gap:14px}
+  label.fld{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500}
+  .fld input,.fld select,.fld textarea{height:46px;border-radius:12px;border:1px solid var(--hairline);background:var(--surface);padding:0 14px;font:inherit;font-size:16px;color:var(--ink)}
+  .fld textarea{height:auto;padding:12px 14px;line-height:1.5}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .checkline{display:flex;align-items:flex-start;gap:11px;font-size:14px;color:var(--ink-soft)}
+  .checkline input{margin-top:3px;accent-color:var(--brand);width:16px;height:16px}
+  .err{color:var(--danger);font-size:14px}
+  .muted{color:var(--ink-soft);font-size:14px}
+
+  /* app shell */
+  .app-top{position:sticky;top:0;z-index:30;backdrop-filter:saturate(1.5) blur(18px);-webkit-backdrop-filter:saturate(1.5) blur(18px);background:var(--glass);border-bottom:1px solid var(--hairline)}
+  .app-top-in{display:flex;align-items:center;justify-content:space-between;height:58px;max-width:760px;margin:0 auto;padding:0 20px}
+  .tabbar{position:sticky;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--hairline);padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--ink-faint);font-size:11px;font-weight:600;cursor:pointer;padding:6px 14px;border-radius:12px}
+  .tab .glyph{font-size:19px;line-height:1}
+  .tab.active{color:var(--brand)}
+  .screen{padding:26px 0 30px;animation:fade .4s var(--ease) both}
+  .screen h2{margin-bottom:16px}
+  .stack{display:flex;flex-direction:column;gap:13px}
+  .list-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow-soft);padding:17px 19px}
+  .list-card .t{font-weight:600}
+  .list-card .s{font-size:13.5px;color:var(--ink-soft)}
+  .nav-card{cursor:pointer;transition:transform .18s var(--ease),box-shadow .2s}
+  .nav-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .pill{font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--brand-tint);color:var(--brand);white-space:nowrap}
+  .empty{border:1px dashed var(--hairline);border-radius:16px;padding:34px 20px;text-align:center;color:var(--ink-soft)}
+  .empty .t{color:var(--ink);font-weight:600;margin-bottom:5px}
+
+  .prov{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--hairline);border-radius:16px;box-shadow:var(--shadow-soft);padding:18px;cursor:pointer;transition:transform .18s var(--ease),box-shadow .2s,border-color .2s}
+  .prov:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .prov.sel{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand) inset}
+  .prov .nm{font-weight:600}
+  .prov .sp{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .slots{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .slot{border:1px solid var(--hairline);background:var(--surface-2);border-radius:11px;padding:9px 13px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--brand);transition:border-color .18s,transform .16s var(--ease)}
+  .slot:hover{border-color:var(--brand)}
+  .slot:active{transform:scale(.96)}
+
+  /* chat */
+  .chat{display:flex;flex-direction:column;height:calc(100vh - 58px - 62px);max-height:640px}
+  .chat-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:8px 2px}
+  .bub{max-width:82%;padding:11px 15px;border-radius:16px;font-size:15px;line-height:1.5;white-space:pre-wrap}
+  .bub.me{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:5px}
+  .bub.them{align-self:flex-start;background:var(--surface);border:1px solid var(--hairline);border-bottom-left-radius:5px}
+  .composer{display:flex;gap:9px;padding-top:10px}
+  .composer input{flex:1;height:46px;border-radius:999px;border:1px solid var(--hairline);background:var(--surface);padding:0 17px;font:inherit;font-size:15.5px;color:var(--ink)}
+  .banner{display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:999px;padding:8px 15px;font-size:12.5px;font-weight:600;margin-bottom:10px}
+  .banner.ok{background:var(--brand-tint);color:var(--brand)}
+  .banner.crisis{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+  .banner a{color:inherit;text-decoration:underline}
+
+  .trend{display:flex;align-items:flex-end;gap:5px;height:56px;margin:4px 0 8px}
+  .trend i{flex:1;min-width:5px;border-radius:4px 4px 0 0;background:color-mix(in srgb,var(--brand) 70%,transparent)}
+
+  .toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--shadow-lift);z-index:80;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  .steps{display:grid;gap:13px;grid-template-columns:repeat(3,1fr)}
+  @media (max-width:720px){.steps{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+  .step{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:22px;box-shadow:var(--shadow-soft)}
+  .step .n{width:29px;height:29px;border-radius:999px;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:14px;margin-bottom:12px;font-variant-numeric:tabular-nums}
+  .step h3{font-size:17px;font-weight:600;margin-bottom:5px}
+  .step p{font-size:14px;color:var(--ink-soft);line-height:1.55}
+
+  footer{border-top:1px solid var(--hairline);padding:30px 0 44px;margin-top:24px;color:var(--ink-faint);font-size:13px;text-align:center}
+  footer a{color:var(--brand);text-decoration:none}
+  .disclaimer{max-width:62ch;margin:0 auto 12px;line-height:1.55}
+
+  .fade{animation:fade .4s var(--ease) both}
+  @keyframes fade{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fade,.screen{animation:none}.prog>i{transition:none}}
+  @media (max-width:560px){.bar-links .nav-link{display:none}}
+</style>
+
+<div id="root"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var root = document.getElementById("root"), rootEl = document.documentElement;
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]; }); };
+
+  /* ---------- persistence (client-side "database") ---------- */
+  var DB = {
+    load: function () { try { return JSON.parse(localStorage.getItem("cp_demo") || "{}"); } catch (e) { return {}; } },
+    save: function (d) { try { localStorage.setItem("cp_demo", JSON.stringify(d)); } catch (e) {} }
+  };
+  var store = DB.load();
+  store.users = store.users || {};        // email -> {name,pw,state,onboarded}
+  store.appts = store.appts || [];        // {id,provider,startsAt,kind}
+  store.msgs = store.msgs || [];          // {from:'you'|'care',body,ts}
+  store.checkins = store.checkins || {};  // slug -> [{ts,score,sev}]
+  store.session = store.session || null;  // email
+  function persist() { DB.save(store); }
+  function me() { return store.session ? store.users[store.session] : null; }
+
+  /* ---------- seed providers + slot logic (mirrors the real app) ---------- */
+  var PROVIDERS = [
+    { id: "rivera", name: "Priya Rivera, PMHNP-BC", sp: ["anxiety", "depression", "adhd"], bio: "Board-certified psychiatric NP focused on whole-person care.", days: [1, 2, 3, 4, 5] },
+    { id: "chen", name: "Sam Chen, MD", sp: ["depression", "sleep"], bio: "Psychiatrist focused on mood and sleep. Warm, evidence-based care.", days: [1, 2, 3, 4, 5, 6, 0] },
+    { id: "okafor", name: "Dara Okafor, LCSW", sp: ["anxiety", "weight", "sleep"], bio: "Therapist specializing in CBT and behavioral change.", days: [2, 3, 4] }
+  ];
+  function nextSlots(prov, n) {
+    var out = [], d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 2);
+    var guard = 0;
+    while (out.length < n && guard < 400) {
+      guard++;
+      var day = d.getDay();
+      if (prov.days.indexOf(day) >= 0 && d.getHours() >= 9 && d.getHours() < 17) {
+        out.push(new Date(d.getTime()));
+      }
+      d.setMinutes(d.getMinutes() + 30);
+      if (d.getHours() >= 17) { d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); }
+    }
+    return out;
+  }
+
+  /* ---------- clinical content (screener + check-ins) ---------- */
+  var OPTS4 = ["Not at all", "Several days", "More than half the days", "Nearly every day"];
+  var QSET = {
+    anxiety: { label: "Anxiety", help: "Over the last 2 weeks, how often have you been bothered by…", items: ["Feeling nervous, anxious, or on edge", "Not being able to stop or control worrying", "Trouble relaxing"] },
+    depression: { label: "Depression", help: "Over the last 2 weeks, how often have you been bothered by…", items: ["Little interest or pleasure in doing things", "Feeling down, depressed, or hopeless", "Trouble sleeping, or sleeping too much"] },
+    adhd: { label: "ADHD", help: "Over the past 6 months, how often…", items: ["Trouble wrapping up the final details of a project", "Difficulty getting things in order for a task", "Problems remembering appointments or obligations"] },
+    sleep: { label: "Sleep", help: "Over the last 2 weeks, how often have you been bothered by…", items: ["Trouble falling or staying asleep", "Feeling tired or low-energy during the day", "Worrying about sleep as bedtime nears"] },
+    weight: { label: "Weight management", help: "Over the last 2 weeks, how often…", items: ["Felt your eating was out of your control", "Felt frustrated with your energy or metabolism", "Felt your body weighed on your mood"] }
+  };
+  var SAFETY = "Thoughts that you would be better off dead, or of hurting yourself in some way";
+
+  /* ---------- AI companion safety (lexical layer, mirrors server) ---------- */
+  function classify(text) {
+    var t = text.toLowerCase();
+    if (/suicid|kill (myself|me)|end (my|it) (life|all)|don'?t want to (live|be alive|wake up)|better off dead|take my (own )?life|no reason to (live|go on)/.test(t)) return "crisis";
+    if (/hurt(ing)? myself|harm(ing)? myself|cut(ting)? myself|self[- ]harm/.test(t)) return "crisis";
+    if (/prescribe me|give me (a prescription|meds|medication|adderall|xanax)|increase my dose|what dose|refill my/.test(t)) return "med";
+    return "none";
+  }
+  function companionReply(text) {
+    return "That sounds like a lot to hold, and it makes sense you'd feel that way. One small thing we could try: name what you're feeling in a word, and notice where it sits in your body. Want to try that, or tell me more about what's on your mind?";
+  }
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("show"); }, 2600); }
+
+  /* ---------- router ---------- */
+  function go(hash) { if (location.hash === hash) render(); else location.hash = hash; }
+  window.addEventListener("hashchange", render);
+
+  function topbar(active) {
+    var authed = !!me();
+    return '<header class="bar"><div class="wrap bar-in">' +
+      '<div class="brand" onclick="location.hash=\'#/\'">' + logo() + '<span>Calm Point</span></div>' +
+      '<div class="bar-links">' +
+      '<span class="demo-tag" title="Interactive demo — data is stored only in your browser">Live demo</span>' +
+      (authed ? '<button class="linkish" onclick="CP.signout()">Sign out</button>' : '<a class="nav-link" href="#/screener/anxiety">Check in</a><button class="linkish" onclick="location.hash=\'#/login\'">Sign in</button>') +
+      themeBtn() + '</div></div></header>';
+  }
+  function logo() { return '<svg class="mark" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="13" cy="13" r="12" stroke="var(--brand)" stroke-width="1.5" opacity=".35"/><circle cx="13" cy="13" r="6.5" fill="var(--brand)"/></svg>'; }
+  function themeBtn() { return '<button class="theme-toggle" onclick="CP.toggleTheme()" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg></button>'; }
+
+  /* ================= LANDING ================= */
+  function landing() {
+    return topbar() +
+      '<div class="hero"><div class="field" aria-hidden="true"><canvas id="fieldCanvas"></canvas></div><div class="wrap">' +
+      '<span class="eyebrow">Calm Point</span>' +
+      '<h1>Mental health care that meets you where you are</h1>' +
+      '<p class="lede">Licensed providers for ADHD, anxiety, depression and more. A private two-minute check-in, a video visit within days, and real support between appointments.</p>' +
+      '<div class="cta-row"><a class="btn" href="#/screener/anxiety">Start your free check-in</a><a class="btn ghost" href="#how">See how it works</a></div>' +
+      '<p class="crisis-line">Not for emergencies. In crisis, call or text <a href="tel:988">988</a> — available 24/7.</p>' +
+      '<div class="conditions">' + Object.keys(QSET).map(function (k) { return '<button class="chip" onclick="location.hash=\'#/screener/' + k + '\'">' + QSET[k].label + '</button>'; }).join("") + '</div>' +
+      '</div></div>' +
+      '<section id="how"><div class="wrap"><div class="section-label">How care works</div><h2 style="margin-bottom:22px">Real clinicians, real plans — no waiting rooms.</h2>' +
+      '<div class="steps">' +
+      step(1, "Check in", "Answer a short, clinically validated questionnaire. Private, and it helps your provider understand what you're experiencing.") +
+      step(2, "Meet your provider", "Book a video visit — most new patients get in within days. Your provider reviews your check-in first.") +
+      step(3, "Feel supported", "Leave with a clear plan, then message your care team and track your progress between visits.") +
+      '</div></div></section>' +
+      footer();
+  }
+  function step(n, t, b) { return '<div class="step"><div class="n">' + n + '</div><h3>' + t + '</h3><p>' + b + '</p></div>'; }
+  function footer() {
+    return '<footer><div class="wrap"><p class="disclaimer">Calm Point is a technology platform supporting telehealth care delivered by licensed providers. This is an interactive demo — accounts and data live only in your browser. If you may be in danger of harming yourself, call or text <a href="tel:988">988</a> or call 911.</p><p>© 2026 Calm Point · Privacy · Terms · Telehealth Consent · HIPAA Notice</p></div></footer>';
+  }
+
+  /* ================= SCREENER ================= */
+  var sc = null;
+  function screener(cond) {
+    if (!QSET[cond]) cond = "anxiety";
+    sc = { cond: cond, idx: 0, answers: [], done: null };
+    return topbar() + '<section class="app-wrap" style="padding-top:30px"><div class="section-label">Free check-in · 2 minutes · private</div><div class="card" id="scCard" aria-live="polite"></div></section>' + footer();
+  }
+  function scItems() { return QSET[sc.cond].items.concat([SAFETY]); }
+  function scRender() {
+    var c = document.getElementById("scCard"); if (!c) return;
+    if (sc.done === "crisis") return scCrisis(c);
+    if (sc.done === "result") return scResult(c);
+    var qs = scItems(), total = qs.length, i = sc.idx, isSafety = i === total - 1, pct = Math.round(i / total * 100);
+    c.innerHTML = '<div class="prog-head"><span>' + QSET[sc.cond].label + ' check-in</span><span class="count">' + (i + 1) + ' of ' + total + '</span></div>' +
+      '<div class="prog"><i style="width:' + pct + '%"></i></div><div class="fade">' +
+      '<p class="q-help">' + (isSafety ? "One more — this one matters to us." : esc(QSET[sc.cond].help)) + '</p>' +
+      '<p class="q-prompt">' + esc(qs[i]) + '</p><div class="opts" role="radiogroup">' +
+      OPTS4.map(function (o, oi) { var s = sc.answers[i] === oi ? " sel" : ""; return '<button class="opt' + s + '" onclick="CP.scChoose(' + oi + ')"><span class="num">' + (oi + 1) + '</span>' + o + '</button>'; }).join("") +
+      '</div><div class="screener-foot"><button class="link-btn" onclick="CP.scBack()"' + (i === 0 ? " disabled" : "") + '>← Back</button></div></div>';
+  }
+  function scResult(c) {
+    var clin = sc.answers.slice(0, scItems().length - 1), s = clin.reduce(function (a, b) { return a + (b || 0); }, 0), maxc = (scItems().length - 1) * 3;
+    var hi = s > 2;
+    c.innerHTML = '<div class="result fade"><span class="badge ' + (hi ? "warn" : "pos") + '">' + (hi ? "A visit would help" : "Low signal") + '</span>' +
+      '<h3>' + (hi ? "Thank you for sharing." : "Thanks for checking in.") + '</h3>' +
+      '<p>' + (hi ? "Your answers suggest that talking with a licensed provider would genuinely help. Create your account and your answers carry into your first visit." : "Your answers don't point to an urgent concern right now — but you know yourself best. A visit can still help you feel your best.") + '</p>' +
+      '<p class="muted" style="font-variant-numeric:tabular-nums">Screen total: ' + s + ' / ' + maxc + ' · educational only, not a diagnosis</p>' +
+      '<a class="btn" href="#/signup">Create your account →</a>' +
+      '<button class="link-btn" onclick="CP.scReset()">Try another check-in</button></div>';
+  }
+  function scCrisis(c) {
+    c.innerHTML = '<div class="crisis fade"><h3>Thank you for being honest. Let’s get you real support, right now.</h3>' +
+      '<p>Some of what you shared tells us you deserve more immediate care than an online visit can offer today. You’re not alone — free, confidential help is available 24/7.</p>' +
+      '<div class="crisis-actions"><a class="crisis-big a1" href="tel:988"><span class="big">Call 988</span><span class="sub">Suicide &amp; Crisis Lifeline</span></a>' +
+      '<a class="crisis-big a2" href="sms:741741"><span class="big">Text HOME to 741741</span><span class="sub">Crisis Text Line</span></a></div>' +
+      '<p style="font-size:14px">If you’re in immediate danger, call <a href="tel:911" style="color:var(--brand);font-weight:600">911</a> or go to your nearest emergency room.</p>' +
+      '<button class="link-btn" onclick="CP.scReset()">← Back to the check-in</button></div>';
+  }
+
+  /* ================= AUTH ================= */
+  function signup() {
+    return topbar() + '<section class="app-wrap" style="padding-top:34px"><div class="card"><h2 style="margin-bottom:4px">Create your account</h2>' +
+      '<p class="muted" style="margin-bottom:20px">A few details and you\'re in. In this demo your account is stored only in your browser.</p>' +
+      '<form class="form" onsubmit="return CP.doSignup(event)">' +
+      '<div class="row2"><label class="fld">First name<input name="first" required></label><label class="fld">Last name<input name="last" required></label></div>' +
+      '<label class="fld">Email<input name="email" type="email" required></label>' +
+      '<label class="fld">Password<input name="pw" type="password" minlength="6" required></label>' +
+      '<label class="checkline"><input type="checkbox" required> I confirm I am 18 or older and agree to the Terms and Privacy Policy.</label>' +
+      '<div class="err" id="suErr"></div>' +
+      '<button class="btn block" type="submit">Create account</button></form>' +
+      '<p class="muted" style="text-align:center;margin-top:16px">Already have an account? <a href="#/login" style="color:var(--brand);font-weight:600">Sign in</a></p></div></section>' + footer();
+  }
+  function login() {
+    return topbar() + '<section class="app-wrap" style="padding-top:34px"><div class="card"><h2 style="margin-bottom:4px">Welcome back</h2>' +
+      '<p class="muted" style="margin-bottom:20px">Sign in to your Calm Point account.</p>' +
+      '<form class="form" onsubmit="return CP.doLogin(event)">' +
+      '<label class="fld">Email<input name="email" type="email" required></label>' +
+      '<label class="fld">Password<input name="pw" type="password" required></label>' +
+      '<div class="err" id="liErr"></div>' +
+      '<button class="btn block" type="submit">Sign in</button></form>' +
+      '<p class="muted" style="text-align:center;margin-top:16px">New here? <a href="#/signup" style="color:var(--brand);font-weight:600">Create an account</a></p></div></section>' + footer();
+  }
+
+  /* ================= APP SHELL ================= */
+  function shell(active, body) {
+    var u = me();
+    return '<div class="app-top"><div class="app-top-in"><div class="brand" onclick="location.hash=\'#/app\'">' + logo() + '<span>Calm Point</span></div>' +
+      '<div class="bar-links"><span class="demo-tag">Demo</span>' + themeBtn() + '</div></div></div>' +
+      '<main class="app-wrap">' + body + '</main>' +
+      '<nav class="tabbar">' +
+      tab("app", "Home", "●", active) + tab("appointments", "Visits", "◐", active) +
+      tab("messages", "Messages", "◒", active) + tab("companion", "Companion", "◍", active) + tab("care", "Care", "✦", active) +
+      '</nav>';
+  }
+  function tab(id, label, glyph, active) { return '<button class="tab ' + (active === id ? "active" : "") + '" onclick="location.hash=\'#/' + id + '\'"><span class="glyph">' + glyph + '</span>' + label + '</button>'; }
+
+  function home() {
+    var u = me(), first = u.name.split(" ")[0];
+    var upc = store.appts.filter(function (a) { return new Date(a.startsAt) > new Date(); }).sort(function (a, b) { return new Date(a.startsAt) - new Date(b.startsAt); });
+    var body = '<section class="screen"><h2>Good to see you, ' + esc(first) + '</h2>' +
+      (u.onboarded ? "" : '<div class="list-card nav-card" style="background:var(--brand);color:#fff;border:none;margin-bottom:13px" onclick="location.hash=\'#/appointments\'"><div><div class="t">Finish setting up your care →</div><div class="s" style="color:rgba(255,255,255,.85)">Book your first visit to get started.</div></div></div>') +
+      '<div class="stack">' +
+      navCard("Next appointment", upc.length ? fmtDate(upc[0].startsAt) + " · " + upc[0].provider : "Book or manage your visits →", "appointments") +
+      navCard("Messages", store.msgs.length ? "You have an active conversation →" : "Your care team is one message away →", "messages") +
+      navCard("Companion", "A space to think out loud between visits →", "companion") +
+      navCard("My care", "Check-ins and visit summaries →", "care") +
+      '</div></section>';
+    return shell("app", body);
+  }
+  function navCard(t, s, dest) { return '<div class="list-card nav-card" onclick="location.hash=\'#/' + dest + '\'"><div><div class="t">' + esc(t) + '</div><div class="s">' + esc(s) + '</div></div><span style="color:var(--ink-faint)">›</span></div>'; }
+
+  function fmtDate(iso) { return new Date(iso).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
+
+  var booking = null;
+  function appointments() {
+    var upc = store.appts.filter(function (a) { return new Date(a.startsAt) > new Date(); }).sort(function (a, b) { return new Date(a.startsAt) - new Date(b.startsAt); });
+    var body = '<section class="screen"><h2>Appointments</h2>' +
+      '<div style="margin-bottom:8px" class="section-label">Upcoming</div>' +
+      (upc.length ? '<div class="stack">' + upc.map(function (a) {
+        return '<div class="list-card"><div><div class="t">' + fmtDate(a.startsAt) + '</div><div class="s">' + (a.kind || "First visit") + ' with ' + esc(a.provider) + '</div></div>' +
+          '<div style="display:flex;gap:8px;align-items:center"><span class="pill">scheduled</span><button class="btn small" onclick="CP.joinVisit()">Join</button><button class="link-btn" onclick="CP.cancelAppt(\'' + a.id + '\')">Cancel</button></div></div>';
+      }).join("") + '</div>' : '<div class="empty"><div class="t">No upcoming visits</div>Pick a provider below to book your first appointment.</div>') +
+      '<div style="margin:22px 0 8px" class="section-label">Book a visit</div><div class="stack" id="provList"></div>' +
+      '<div id="slotArea"></div></section>';
+    setTimeout(renderProviders, 0);
+    return shell("appointments", body);
+  }
+  function renderProviders() {
+    var el = document.getElementById("provList"); if (!el) return;
+    el.innerHTML = PROVIDERS.map(function (p) {
+      return '<div class="prov' + (booking && booking.prov === p.id ? " sel" : "") + '" onclick="CP.pickProvider(\'' + p.id + '\')"><div class="nm">' + esc(p.name) + '</div><div class="s" style="font-size:13.5px;color:var(--ink-soft)">' + esc(p.bio) + '</div>' +
+        '<div class="sp">' + p.sp.map(function (s) { return '<span class="pill">' + s + '</span>'; }).join("") + '</div></div>';
+    }).join("");
+    renderSlots();
+  }
+  function renderSlots() {
+    var el = document.getElementById("slotArea"); if (!el) return;
+    if (!booking) { el.innerHTML = ""; return; }
+    var p = PROVIDERS.find(function (x) { return x.id === booking.prov; });
+    var slots = nextSlots(p, 10);
+    el.innerHTML = '<div style="margin:18px 0 8px" class="section-label">Times with ' + esc(p.name) + '</div><div class="slots">' +
+      slots.map(function (d) { return '<button class="slot" onclick="CP.book(\'' + d.toISOString() + '\')">' + d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + " " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) + '</button>'; }).join("") + '</div>';
+  }
+
+  function messages() {
+    var body = '<section class="screen"><h2>Messages</h2>' +
+      (store.appts.length ? "" : '<p class="muted" style="margin-bottom:12px">Book a visit and your care team appears here. You can still say hello below.</p>') +
+      '<div class="banner ok"><span>Secure · private to you and your care team</span></div>' +
+      '<div class="chat"><div class="chat-scroll" id="msgScroll">' +
+      (store.msgs.length ? store.msgs.map(function (m) { return '<div class="bub ' + (m.from === "you" ? "me" : "them") + '">' + esc(m.body) + '</div>'; }).join("") : '<p class="muted">Say hello — your care team replies here.</p>') +
+      '</div><form class="composer" onsubmit="return CP.sendMsg(event)"><input name="body" placeholder="Write a message…" autocomplete="off" required><button class="btn small" type="submit">Send</button></form></div></section>';
+    setTimeout(scrollMsgs, 0);
+    return shell("messages", body);
+  }
+  function scrollMsgs() { var s = document.getElementById("msgScroll"); if (s) s.scrollTop = s.scrollHeight; }
+
+  var comp = { started: false, crisis: false, turns: [] };
+  function companion() {
+    var body = '<section class="screen"><h2>Companion</h2><div id="compBody"></div></section>';
+    setTimeout(renderCompanion, 0);
+    return shell("companion", body);
+  }
+  function renderCompanion() {
+    var el = document.getElementById("compBody"); if (!el) return;
+    if (!comp.started) {
+      el.innerHTML = '<div class="card"><h3 style="font-size:20px;margin-bottom:12px">Before we start</h3>' +
+        '<p class="muted" style="line-height:1.7;margin-bottom:18px">• I\'m an AI companion, not a therapist or doctor — no diagnosis, no medication advice.<br>• I\'m not for emergencies. In crisis, call or text 988 any time.<br>• What we talk about is private to your account.</p>' +
+        '<button class="btn block" onclick="CP.compStart()">I understand — let\'s talk</button></div>';
+      return;
+    }
+    el.innerHTML = '<div class="banner ' + (comp.crisis ? "crisis" : "ok") + '">' +
+      '<span>' + (comp.crisis ? "Support resources active — you're not alone" : "AI companion · not a clinician · not for emergencies") + '</span><a href="tel:988">Crisis? 988</a></div>' +
+      '<div class="chat"><div class="chat-scroll" id="compScroll">' +
+      comp.turns.map(function (t) { return '<div class="bub ' + (t.who === "you" ? "me" : "them") + '">' + esc(t.text) + '</div>'; }).join("") +
+      '</div><form class="composer" onsubmit="return CP.compSend(event)"><input name="body" placeholder="Say what\'s true for you right now…" autocomplete="off" required><button class="btn small" type="submit">Send</button></form></div>';
+    var s = document.getElementById("compScroll"); if (s) s.scrollTop = s.scrollHeight;
+  }
+
+  function care() {
+    var slugs = [["gad-7", "GAD-7", "anxiety"], ["phq-9", "PHQ-9", "depression"]];
+    var body = '<section class="screen"><h2>My care</h2><div class="section-label">Check-ins</div><div class="stack">' +
+      slugs.map(function (row) {
+        var slug = row[0], hist = store.checkins[slug] || [];
+        var due = !hist.length || (Date.now() - hist[hist.length - 1].ts > 12096e5);
+        var trend = hist.length ? '<div class="trend">' + hist.map(function (h) { var mx = Math.max.apply(null, hist.map(function (x) { return x.score; }).concat([1])); return '<i style="height:' + Math.max(8, h.score / mx * 56) + 'px" title="' + h.score + '"></i>'; }).join("") + '</div><div class="s" style="font-size:13.5px;color:var(--ink-soft)">Latest: <b style="color:var(--ink)">' + hist[hist.length - 1].score + '</b> · ' + hist[hist.length - 1].sev + '</div>' : '<div class="s" style="font-size:13.5px;color:var(--ink-soft)">Your first check-in starts a trend your provider can follow.</div>';
+        return '<div class="list-card" style="flex-direction:column;align-items:stretch;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div class="t">' + row[1] + '</div>' + (due ? '<button class="btn small" onclick="CP.startCheckin(\'' + slug + '\',\'' + row[2] + '\')">Check in now</button>' : '<span class="pill" style="background:color-mix(in srgb,var(--positive) 16%,transparent);color:var(--positive)">up to date</span>') + '</div>' + trend + '</div>';
+      }).join("") + '</div>' +
+      '<div class="section-label" style="margin-top:24px">Visit summaries</div>' +
+      '<div class="empty"><div class="t">Your visit summaries will appear here</div>After each visit, your provider signs a summary of your plan.</div></section>';
+    return shell("care", body);
+  }
+
+  /* check-in runner reuses screener UI in a modal-ish card on the care route */
+  var ci = null;
+  function checkinScreen(slug, cond) {
+    ci = { slug: slug, cond: cond, idx: 0, answers: [], done: null };
+    var body = '<section class="screen"><button class="link-btn" onclick="location.hash=\'#/care\'">← My care</button><div class="card" id="ciCard" style="margin-top:10px"></div></section>';
+    setTimeout(ciRender, 0);
+    return shell("care", body);
+  }
+  function ciItems() { return QSET[ci.cond].items.concat([SAFETY]); }
+  function ciRender() {
+    var c = document.getElementById("ciCard"); if (!c) return;
+    if (ci.done === "crisis") return scCrisisInto(c, "CP.ciReset()");
+    if (ci.done === "result") { ciSave(); c.innerHTML = '<div class="result fade"><span class="badge pos">Recorded</span><h3>Thanks for checking in.</h3><p>Your provider will see this, and it\'s now part of your trend.</p><a class="btn" href="#/care">Back to my care</a></div>'; return; }
+    var qs = ciItems(), total = qs.length, i = ci.idx, isSafety = i === total - 1, pct = Math.round(i / total * 100);
+    c.innerHTML = '<div class="prog-head"><span>' + QSET[ci.cond].label + ' check-in</span><span class="count">' + (i + 1) + ' of ' + total + '</span></div><div class="prog"><i style="width:' + pct + '%"></i></div><div class="fade">' +
+      '<p class="q-help">' + (isSafety ? "One more — this one matters to us." : esc(QSET[ci.cond].help)) + '</p><p class="q-prompt">' + esc(qs[i]) + '</p><div class="opts">' +
+      OPTS4.map(function (o, oi) { var s = ci.answers[i] === oi ? " sel" : ""; return '<button class="opt' + s + '" onclick="CP.ciChoose(' + oi + ')"><span class="num">' + (oi + 1) + '</span>' + o + '</button>'; }).join("") + '</div></div>';
+  }
+  function scCrisisInto(c, backFn) {
+    c.innerHTML = '<div class="crisis fade"><h3>Thank you for being honest. Let’s get you support right now.</h3><p>You deserve more immediate care than a check-in can offer. You’re not alone — help is available 24/7.</p><div class="crisis-actions"><a class="crisis-big a1" href="tel:988"><span class="big">Call 988</span><span class="sub">Suicide &amp; Crisis Lifeline</span></a><a class="crisis-big a2" href="sms:741741"><span class="big">Text HOME to 741741</span><span class="sub">Crisis Text Line</span></a></div><button class="link-btn" onclick="' + backFn + '">← Back</button></div>';
+  }
+  function ciSave() {
+    var clin = ci.answers.slice(0, ciItems().length - 1), s = clin.reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sev = s <= 2 ? "minimal" : s <= 5 ? "mild" : "moderate";
+    store.checkins[ci.slug] = (store.checkins[ci.slug] || []).concat([{ ts: Date.now(), score: s, sev: sev }]);
+    persist();
+  }
+
+  /* ================= render dispatch ================= */
+  function render() {
+    var h = location.hash || "#/";
+    var parts = h.replace(/^#\//, "").split("/");
+    var route = parts[0] || "";
+    var authed = !!me();
+    var appRoutes = ["app", "appointments", "messages", "companion", "care"];
+    if (appRoutes.indexOf(route) >= 0 && !authed) { location.hash = "#/login"; return; }
+
+    var html;
+    if (route === "" ) html = landing();
+    else if (route === "screener") html = screener(parts[1]);
+    else if (route === "signup") html = authed ? homeRedirect() : signup();
+    else if (route === "login") html = authed ? homeRedirect() : login();
+    else if (route === "app") html = home();
+    else if (route === "appointments") html = appointments();
+    else if (route === "messages") html = messages();
+    else if (route === "companion") html = companion();
+    else if (route === "care") html = care();
+    else if (route === "checkin") html = checkinScreen(parts[1], parts[2]);
+    else html = landing();
+
+    root.innerHTML = html;
+    window.scrollTo(0, 0);
+    if (route === "") startField();
+    if (route === "screener") scRender();
+  }
+  function homeRedirect() { location.hash = "#/app"; return ""; }
+
+  /* ================= ambient field ================= */
+  var fieldRAF;
+  function startField() {
+    var cv = document.getElementById("fieldCanvas"); if (!cv) return;
+    var ctx = cv.getContext("2d"), t = 0, DPR = Math.min(2, window.devicePixelRatio || 1);
+    var blobs = []; for (var i = 0; i < 5; i++) blobs.push({ x: Math.random(), y: Math.random(), r: .28 + Math.random() * .22, p: Math.random() * 6.28, s: .4 + Math.random() * .5 });
+    function col() { return getComputedStyle(rootEl).getPropertyValue("--brand").trim() || "#3e6b5c"; }
+    function hexA(hex, a) { hex = hex.replace("#", ""); if (hex.length === 3) hex = hex.split("").map(function (c) { return c + c; }).join(""); var n = parseInt(hex, 16); return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
+    function draw() {
+      cv.width = cv.clientWidth * DPR; cv.height = cv.clientHeight * DPR;
+      var w = cv.width, hh = cv.height; ctx.clearRect(0, 0, w, hh); var cc = col();
+      for (var i = 0; i < blobs.length; i++) { var b = blobs[i], br = reduce ? 1 : 1 + Math.sin(t * 6e-4 * b.s + b.p) * .12, cx = b.x * w, cy = b.y * hh * .9, rad = b.r * Math.min(w, hh) * br, g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad); g.addColorStop(0, hexA(cc, .1)); g.addColorStop(1, hexA(cc, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.2832); ctx.fill(); }
+      if (!reduce) { t += 16; fieldRAF = requestAnimationFrame(draw); }
+    }
+    cancelAnimationFrame(fieldRAF); draw();
+  }
+
+  /* ================= public actions ================= */
+  window.CP = {
+    toggleTheme: function () { var cur = rootEl.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"); rootEl.setAttribute("data-theme", cur === "dark" ? "light" : "dark"); },
+    signout: function () { store.session = null; persist(); location.hash = "#/"; },
+
+    scChoose: function (v) { var qs = scItems(), i = sc.idx; sc.answers[i] = v; if (i === qs.length - 1 && v > 0) { sc.done = "crisis"; return scRender(); } setTimeout(function () { if (i + 1 < qs.length) { sc.idx++; scRender(); } else { sc.done = "result"; scRender(); } }, 150); },
+    scBack: function () { if (sc.idx > 0) { sc.idx--; scRender(); } },
+    scReset: function () { sc.idx = 0; sc.answers = []; sc.done = null; scRender(); },
+
+    doSignup: function (e) { e.preventDefault(); var f = e.target, email = f.email.value.trim().toLowerCase(); if (store.users[email]) { document.getElementById("suErr").textContent = "That email already has an account. Try signing in."; return false; } store.users[email] = { name: f.first.value.trim() + " " + f.last.value.trim(), pw: f.pw.value, onboarded: false }; store.session = email; persist(); toast("Welcome to Calm Point"); location.hash = "#/app"; return false; },
+    doLogin: function (e) { e.preventDefault(); var f = e.target, email = f.email.value.trim().toLowerCase(), u = store.users[email]; if (!u || u.pw !== f.pw.value) { document.getElementById("liErr").textContent = "That email and password didn't match."; return false; } store.session = email; persist(); location.hash = "#/app"; return false; },
+
+    pickProvider: function (id) { booking = { prov: id }; renderProviders(); document.getElementById("slotArea").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" }); },
+    book: function (iso) { var p = PROVIDERS.find(function (x) { return x.id === booking.prov; }); store.appts.push({ id: "a" + Date.now(), provider: p.name, startsAt: iso, kind: "First visit" }); var u = me(); u.onboarded = true; persist(); booking = null; toast("Booked! You'll get a reminder before your visit."); render(); },
+    cancelAppt: function (id) { store.appts = store.appts.filter(function (a) { return a.id !== id; }); persist(); toast("Visit cancelled"); render(); },
+    joinVisit: function () { toast("In the full app this opens the video visit (Zoom / Daily) with AI note-taking."); },
+
+    sendMsg: function (e) { e.preventDefault(); var f = e.target, body = f.body.value.trim(); if (!body) return false; store.msgs.push({ from: "you", body: body, ts: Date.now() }); f.body.value = ""; persist(); var scr = document.getElementById("msgScroll"); scr.insertAdjacentHTML("beforeend", '<div class="bub me">' + esc(body) + '</div>'); scrollMsgs(); setTimeout(function () { var reply = "Thanks for reaching out — a member of your care team will reply within one business day. If this is urgent or you're in crisis, please call or text 988."; store.msgs.push({ from: "care", body: reply, ts: Date.now() }); persist(); var s2 = document.getElementById("msgScroll"); if (s2) { s2.insertAdjacentHTML("beforeend", '<div class="bub them">' + esc(reply) + '</div>'); scrollMsgs(); } }, 1100); return false; },
+
+    compStart: function () { comp.started = true; comp.turns = [{ who: "them", text: "Hi — I'm glad you're here. This is your space to think out loud. What's on your mind?" }]; renderCompanion(); },
+    compSend: function (e) { e.preventDefault(); var f = e.target, text = f.body.value.trim(); if (!text) return false; f.body.value = ""; comp.turns.push({ who: "you", text: text }); var cls = classify(text); if (cls === "crisis") { comp.crisis = true; comp.turns.push({ who: "them", text: "Thank you for telling me — that took courage, and I'm staying right here with you. What you're carrying deserves real human support right now: call or text 988 any time, or text HOME to 741741. If you're in immediate danger, please call 911. I've let your care team know. I can stay with you here while you reach out." }); } else if (cls === "med") { comp.turns.push({ who: "them", text: "Medication questions are important — and they belong with your provider, who knows your full picture. I can't advise on prescriptions or doses. Would you like to message your care team from the Messages tab? I'm happy to keep working through what's on your mind meanwhile." }); } else if (comp.crisis) { comp.turns.push({ who: "them", text: "I'm still right here with you. If you haven't yet, please reach out to 988 (call or text) or text HOME to 741741 — real people, any hour. Would you like me to stay with you while you do?" }); } else { comp.turns.push({ who: "them", text: companionReply(text) }); } renderCompanion(); return false; },
+
+    startCheckin: function (slug, cond) { location.hash = "#/checkin/" + slug + "/" + cond; },
+    ciChoose: function (v) { var qs = ciItems(), i = ci.idx; ci.answers[i] = v; if (i === qs.length - 1 && v > 0) { ci.done = "crisis"; return ciRender(); } setTimeout(function () { if (i + 1 < qs.length) { ci.idx++; ciRender(); } else { ci.done = "result"; ciRender(); } }, 150); },
+    ciReset: function () { ci.idx = 0; ci.answers = []; ci.done = null; ciRender(); }
+  };
+
+  document.addEventListener("keydown", function (e) {
+    if (sc && !sc.done && location.hash.indexOf("#/screener") === 0) { var n = parseInt(e.key, 10); if (n >= 1 && n <= 4) CP.scChoose(n - 1); }
+    if (ci && !ci.done && location.hash.indexOf("#/checkin") === 0) { var m = parseInt(e.key, 10); if (m >= 1 && m <= 4) CP.ciChoose(m - 1); }
+  });
+
+  if (!location.hash) location.hash = "#/";
+  render();
+})();
+</script>

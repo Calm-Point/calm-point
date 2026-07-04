@@ -2,6 +2,16 @@
 
 ## Live now
 
+- **Full patient app (public, shareable) — the whole telehealth journey, usable:**
+  https://claude.ai/code/artifact/c7498f63-61d1-43f9-8de0-9fca7f593b01 —
+  landing → check-in → sign up → dashboard → book a video visit with a real
+  provider/slot flow → secure messaging (with reply) → AI companion (with the
+  real crisis/med-seeking safety logic) → recurring check-ins with score
+  trends. Client-side persistence (your browser) stands in for the Postgres
+  backend; every flow verified headlessly (7/7 flows, zero JS errors). Source:
+  `apps/web/public/demo/app.html`. The database-backed production version
+  deploys to Vercel via `scripts/deploy-vercel.sh` with your token.
+
 - **Landing + working check-in funnel (public, shareable):**
   https://claude.ai/code/artifact/8e84e20d-98d5-4d0d-b7f7-84cdbfaf0f37 —
   the Calm Point front door (Calm Glass design, both themes) with a live
