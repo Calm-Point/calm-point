@@ -8,6 +8,18 @@
 | **Web app hosting** | ⏳ one-time human step required (below) |
 | **Auto-deploy** | ✅ ready — `.github/workflows/deploy.yml` deploys on every push once secrets exist |
 
+## Build-readiness (verified)
+
+- `packages/db` runs `prisma generate` on `postinstall`, so a fresh Vercel/CI
+  install produces the Prisma client with no extra build step.
+- `apps/web` build command is `next build`; framework auto-detected as Next.js.
+- Vercel project settings for this monorepo: **Root Directory = `apps/web`**,
+  install runs from repo root (pnpm workspace auto-detected). `apps/web/vercel.json`
+  carries the reminder cron.
+- ⚠️ The existing Vercel project named `calmpoint` is linked to a *different*
+  repo (`johnmatveyev-lab/CalmPoint`, an older prototype) — do **not** reuse it.
+  Create a new Vercel project pointed at `Calm-Point/calm-point`.
+
 ## The one-time human step (pick either path)
 
 ### Path A — GitHub secrets (recommended: enables fully autonomous deploys)
