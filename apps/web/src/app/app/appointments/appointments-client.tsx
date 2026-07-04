@@ -136,6 +136,13 @@ export function AppointmentsClient() {
                   <Button size="sm" onClick={() => (window.location.href = `/app/visit/${a.id}`)}>
                     Join
                   </Button>
+                  <a
+                    href={`/api/v1/appointments/${a.id}/ics`}
+                    className="text-sm text-brand underline"
+                    download
+                  >
+                    Add to calendar
+                  </a>
                   <Button variant="ghost" size="sm" onClick={() => cancel(a.id)}>
                     Cancel
                   </Button>

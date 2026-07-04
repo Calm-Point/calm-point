@@ -94,7 +94,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [x] Matching: state licensure (verified, unexpired) ∩ acceptingNew ∩ availability (condition-specialty filter still open)
 - [x] Patient booking flow (pick provider → pick slot), cancel with late-cancel window; advisory-lock double-booking protection (reschedule UI still open)
 - [x] Creates `CareRelationship` on first booking
-- [ ] Reminders: email + SMS (Twilio) at T-24h and T-1h; ICS calendar attachment; PHI-free message content
+- [x] Reminder engine: T-24h/T-1h tiers (unit-tested windows), deduped in-app notifications, cron endpoint + vercel.json schedule, ICS download (PHI-light, escaping tested); email/SMS delivery slots in when SES/Twilio keys + BAAs exist
 - [ ] No-show + late-cancel handling; provider-initiated cancel/rebook
 
 ### 3.2 Video visits
