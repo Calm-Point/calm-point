@@ -54,6 +54,14 @@ export default async function PatientDashboard() {
             Your recurring wellbeing check-ins will appear here.
           </CardDescription>
         </Card>
+        <Card>
+          <CardTitle className="mb-1 text-lg">Companion</CardTitle>
+          <CardDescription>
+            <a href="/app/therapist" className="text-brand underline">
+              A space to think out loud between visits →
+            </a>
+          </CardDescription>
+        </Card>
       </div>
       <div className="mt-6">
         <EmptyState

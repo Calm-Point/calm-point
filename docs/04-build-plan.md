@@ -160,12 +160,12 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 
 **Goal: the standalone AI Therapist feature — voice + text — with a safety architecture strong enough to defend. Detail: `docs/06-ai-features.md`.**
 
-- [ ] AI gateway hardening: per-user rate limits, budget caps, `AiInteraction` logging, zero-retention headers
-- [ ] **Safety layer first** (blocking all engines): crisis/self-harm classifier on every user turn (fast Claude call or classifier) → escalation UX (warm handoff: 988, crisis text, offer to message care team, provider alert on flag); jailbreak resistance; hard scope rules (no diagnosis, no medication advice, no discouraging professional care)
-- [ ] Text therapist: Claude with system prompt encoding supportive-companion scope, CBT-style skills, session memory (summaries carried forward, patient-visible + deletable)
+- [x] AI gateway: per-user rate limits, daily turn caps, `AiInteraction` logging (zero-retention headers land with the Anthropic healthcare key)
+- [x] **Safety layer first**: two-layer classifier (always-on lexical + Claude haiku union) on every turn → crisis mode locks the session, 988/Crisis-Text handoff, care-team+admin alerts, audited escalations; med-seeking/minor redirects; scope rules in persona prompt
+- [x] Text therapist: Claude persona (supportive-companion scope, CBT-style skills), transcript-scoped context, end-of-session summaries (deletable-summary UI still open)
 - [ ] Voice: `AiVoiceEngine` interface → **Gemini Live API** implementation (WebRTC/WS streaming, barge-in, voice persona config); **xAI Grok voice** implementation behind cohort flag
 - [ ] Session summaries → S3 + `AiTherapySession`; optional share-with-provider toggle (default OFF, explicit patient consent)
-- [ ] Disclosure UX: first-run explains it's AI, not a clinician, not for emergencies; persistent indicator during sessions
+- [x] Disclosure UX: first-run acknowledgment gate + persistent AI/crisis indicator
 - [ ] **Safety eval suite in CI**: ≥ 200 adversarial prompts (crisis language, med-seeking, diagnosis-seeking, jailbreaks, minors) — required pass rate 100% on crisis-escalation cases, ≥ 98% on scope cases; regressions block merge
 - [ ] 🚦 **Launch gate: clinical + legal sign-off required to flip the `ai-therapist` flag for any real cohort.** Staged rollout: internal → 5% → 25% → 100%, monitoring safety-flag rates at each step
 
