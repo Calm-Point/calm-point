@@ -4,6 +4,12 @@
 
 > ⚕️ **This is a healthcare product.** Every feature that touches patient data must be built HIPAA-first. Read [`docs/05-compliance.md`](docs/05-compliance.md) before writing any code that stores, transmits, or displays patient information.
 
+## ▶️ Try it live
+
+- **Full patient app (usable):** https://claude.ai/code/artifact/c7498f63-61d1-43f9-8de0-9fca7f593b01 — check-in → sign up → book a visit → message your care team → AI companion → check-ins. Data persists in your browser.
+- **Landing + funnel:** https://claude.ai/code/artifact/8e84e20d-98d5-4d0d-b7f7-84cdbfaf0f37
+- **Production (database-backed) deploy:** `scripts/deploy-vercel.sh` — one command with a Vercel token + `DATABASE_URL`. See [`docs/09-deployment.md`](docs/09-deployment.md). The production Postgres schema is already live on Supabase.
+
 ---
 
 ## What we are building
