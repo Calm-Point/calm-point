@@ -239,6 +239,13 @@
   .plan ul{margin:12px 0 0;padding-left:18px;color:var(--ink-soft);font-size:14px;line-height:1.7}
   .task{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--surface);border:1px solid var(--hairline);border-radius:14px}
   .task input{width:18px;height:18px;accent-color:var(--brand)}
+  .uploader{display:flex;align-items:center;gap:13px;border:1.5px dashed var(--hairline);border-radius:14px;padding:15px 16px;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface-2)}
+  .uploader:hover{border-color:var(--brand)}
+  .uploader.done{border-style:solid;border-color:var(--brand);background:var(--brand-tint)}
+  .uploader input[type=file]{display:none}
+  .uploader .uic{width:40px;height:40px;border-radius:11px;background:var(--surface);display:grid;place-items:center;color:var(--brand);flex:none}
+  .uploader .ut{font-weight:600;font-size:14.5px}.uploader .us{font-size:12.5px;color:var(--ink-soft)}
+  .thumb{margin-top:8px;border-radius:12px;max-height:150px;border:1px solid var(--hairline)}
   .task.done label{text-decoration:line-through;color:var(--ink-faint)}
   footer{border-top:1px solid var(--hairline);padding:30px 0 44px;margin-top:24px;color:var(--ink-faint);font-size:13px;text-align:center}
   footer a{color:var(--brand);text-decoration:none}
@@ -362,6 +369,67 @@
     if(me()){me().intake=rec;persist();}else{store.pendingScreen=rec;persist();}
     c.innerHTML='<div class="result fade"><span class="badge '+(hi?"warn":"pos")+'">'+(hi?"A visit would help":"Low signal")+'</span><h3>'+(hi?"Thank you for sharing.":"Thanks for checking in.")+'</h3><p>'+(hi?"Your answers suggest that talking with a licensed provider would genuinely help. Create your account and your answers carry into your first visit.":"Your answers don't point to an urgent concern right now — but you know yourself best. A visit can still help you feel your best.")+'</p><p class="muted" style="font-variant-numeric:tabular-nums">Screen total: '+s+' / '+maxc+' · educational only, not a diagnosis</p><a class="btn" href="#/signup">Create your account →</a><button class="link-btn" onclick="CP.scReset()">Try another check-in</button></div>';}
   function crisisInto(c,back){c.innerHTML='<div class="crisis fade"><h3>Thank you for being honest. Let’s get you real support, right now.</h3><p>Some of what you shared tells us you deserve more immediate care than an online visit can offer today. You’re not alone — free, confidential help is available 24/7.</p><div class="crisis-actions"><a class="crisis-big a1" href="tel:988"><span class="big">Call 988</span><span class="sub">Suicide &amp; Crisis Lifeline</span></a><a class="crisis-big a2" href="sms:741741"><span class="big">Text HOME to 741741</span><span class="sub">Crisis Text Line</span></a></div><p style="font-size:14px">If you’re in immediate danger, call <a href="tel:911" style="color:var(--brand);font-weight:600">911</a> or go to your nearest emergency room.</p><button class="link-btn" onclick="'+back+'">← Back</button></div>';}
+
+  /* ================= FULL INTAKE BATTERY (validated screeners → AI analysis) ================= */
+  var OPTS5=["Never","Rarely","Sometimes","Often","Very often"];
+  var ISI5=["None","Mild","Moderate","Severe","Very severe"];
+  var YESNO=["No","Yes"];
+  var BATTERY=[
+    {slug:"phq-9",label:"Mood",title:"PHQ-9",help:"Over the last 2 weeks, how often have you been bothered by…",opts:OPTS4,items:[
+      "Little interest or pleasure in doing things","Feeling down, depressed, or hopeless","Trouble falling or staying asleep, or sleeping too much","Feeling tired or having little energy","Poor appetite or overeating","Feeling bad about yourself — or that you are a failure or have let yourself or your family down","Trouble concentrating on things, such as reading or watching television","Moving or speaking so slowly others could notice — or being so fidgety and restless you move around a lot more than usual"]},
+    {slug:"gad-7",label:"Anxiety",title:"GAD-7",help:"Over the last 2 weeks, how often have you been bothered by…",opts:OPTS4,items:[
+      "Feeling nervous, anxious, or on edge","Not being able to stop or control worrying","Worrying too much about different things","Trouble relaxing","Being so restless that it's hard to sit still","Becoming easily annoyed or irritable","Feeling afraid as if something awful might happen"]},
+    {slug:"asrs",label:"Focus & attention",title:"ASRS v1.1",help:"Over the past 6 months, how often…",opts:OPTS5,items:[
+      "Trouble wrapping up the final details of a project, once the challenging parts are done","Difficulty getting things in order when a task requires organization","Problems remembering appointments or obligations","When a task requires a lot of thought, how often do you avoid or delay getting started","Fidget or squirm with your hands or feet when sitting a long time","Feel overly active and compelled to do things, as if driven by a motor"]},
+    {slug:"isi",label:"Sleep",title:"ISI",help:"Over the last 2 weeks, please rate your sleep…",opts:ISI5,items:[
+      "Difficulty falling asleep","Difficulty staying asleep","Problem waking up too early","Dissatisfaction with your current sleep pattern","How much your sleep problem interferes with your daily functioning","How noticeable to others your sleep problem is","How worried or distressed you are about your sleep"]},
+    {slug:"pc-ptsd-5",label:"Stress & trauma",title:"PC-PTSD-5",help:"Thinking of a frightening, horrible, or traumatic experience — in the past month, have you…",opts:YESNO,items:[
+      "Had nightmares about it, or thought about it when you did not want to","Tried hard not to think about it, or gone out of your way to avoid reminders","Been constantly on guard, watchful, or easily startled","Felt numb or detached from people, activities, or your surroundings","Felt guilty, or unable to stop blaming yourself or others"]}
+  ];
+  function ivFlat(){var a=[];BATTERY.forEach(function(b){b.items.forEach(function(it){a.push({instr:b,prompt:it,opts:b.opts});});});a.push({instr:{slug:"safety",title:"Safety",label:"Safety"},prompt:SAFETY,opts:OPTS4,safety:true});return a;}
+  var iv=null;
+  function intake(){if(!me()){location.hash="#/login";return "";}iv={idx:0,answers:[],done:null};var body=topbar()+'<section class="app-wrap" style="padding-top:26px"><div class="section-label">Your intake · validated screeners · private</div><div class="card" id="ivCard" aria-live="polite"></div><p class="muted" style="text-align:center;margin-top:14px;font-size:13px">Your answers and an AI-generated summary are shared with your provider before your first visit.</p></section>'+footer();setTimeout(ivRender,0);return body;}
+  function ivRender(){var c=document.getElementById("ivCard");if(!c)return;var flat=ivFlat();if(iv.done==="crisis")return crisisInto(c,"CP.ivReset()");if(iv.done==="result")return ivResult(c);var total=flat.length,i=iv.idx,item=flat[i],pct=Math.round(i/total*100),grp=item.instr;
+    c.innerHTML='<div class="prog-head"><span>'+esc(grp.label||grp.title)+(item.safety?"":' · '+grp.title)+'</span><span class="count">'+(i+1)+' of '+total+'</span></div><div class="prog"><i style="width:'+pct+'%"></i></div><div class="fade"><p class="q-help">'+(item.safety?"One more — this one matters to us.":esc(grp.help))+'</p><p class="q-prompt">'+esc(item.prompt)+'</p><div class="opts" role="radiogroup">'+item.opts.map(function(o,oi){var s=iv.answers[i]===oi?" sel":"";return '<button class="opt'+s+'" onclick="CP.ivChoose('+oi+')"><span class="num">'+(oi+1)+'</span>'+esc(o)+'</button>';}).join("")+'</div><div class="screener-foot"><button class="link-btn" onclick="CP.ivBack()"'+(i===0?" disabled":"")+'>'+icon("chev",14)+' Back</button></div></div>';}
+  function ivAnalyze(){var flat=ivFlat(),byInstr={};flat.forEach(function(item,i){if(item.safety)return;var k=item.instr.slug;var s=byInstr[k]||(byInstr[k]={instr:item.instr,sum:0,n:0});s.sum+=(iv.answers[i]||0);s.n++;});
+    var safetyFlag=(iv.answers[flat.length-1]||0)>0;
+    var results=Object.keys(byInstr).map(function(k){var s=byInstr[k],maxPer=s.instr.opts.length-1,max=s.n*maxPer,pct=max?s.sum/max:0,sev=pct<.25?"minimal":pct<.5?"mild":pct<.7?"moderate":"elevated";return {slug:k,title:s.instr.title,label:s.instr.label,score:s.sum,max:max,sev:sev};});
+    var flags=[];if(safetyFlag)flags.push({sev:"critical",text:"Safety item endorsed — provider to prioritize a same-day safety check-in."});results.forEach(function(r){if(r.sev==="elevated")flags.push({sev:"high",text:r.label+": elevated ("+r.score+"/"+r.max+")"});else if(r.sev==="moderate")flags.push({sev:"medium",text:r.label+": moderate ("+r.score+"/"+r.max+")"});});
+    var notable=results.filter(function(r){return r.sev==="moderate"||r.sev==="elevated";});
+    var summary="The patient completed a validated intake battery ("+flat.length+" items). "+(notable.length?notable.map(function(r){return r.label.toLowerCase()+" screened "+r.sev;}).join("; ")+". These domains warrant clinical exploration at the visit.":"No domains screened in the elevated range.")+" This AI-generated summary is decision-support only — the provider reviews, diagnoses, and signs.";
+    return {results:results,flags:flags,summary:summary,items:flat.length,ts:Date.now(),safetyFlag:safetyFlag};}
+  function ivResult(c){var a=me().intake;var sevPill={minimal:"pos",mild:"pos",moderate:"warn",elevated:"warn"};
+    c.innerHTML='<div class="result fade" style="text-align:left;align-items:stretch"><div style="text-align:center"><span class="badge pos">Intake complete · '+a.items+' items</span><h3 style="margin-top:12px">Thank you — this really helps.</h3><p style="margin:6px auto 0">Your responses and an AI-generated summary have been shared securely with your provider, who will review them before your visit.</p></div>'+
+      (a.flags.length?'<div style="margin-top:18px"><div class="section-label">What your provider will prioritize</div><div class="stack">'+a.flags.map(function(f){return '<div class="list-card" style="border-left:3px solid '+(f.sev==="critical"?"var(--danger)":f.sev==="high"?"var(--clay)":"var(--brand)")+'"><div class="s" style="color:var(--ink)">'+esc(f.text)+'</div></div>';}).join("")+'</div></div>':"")+
+      '<div style="margin-top:18px"><div class="section-label">Your screening profile</div><div class="stack">'+a.results.map(function(r){return '<div class="list-card"><div><div class="t">'+esc(r.label)+'</div><div class="s">'+esc(r.title)+' · '+r.score+' / '+r.max+'</div></div><span class="badge '+(sevPill[r.sev]||"pos")+'">'+r.sev+'</span></div>';}).join("")+'</div></div>'+
+      '<a class="btn block" style="margin-top:20px" href="#/verify">Continue: verify & coverage</a></div>';}
+
+  /* ================= IDENTITY + INSURANCE + CONSENT ================= */
+  var vfiles={};
+  function verify(){
+    if(!me()){location.hash="#/login";return "";}
+    return topbar()+'<section class="app-wrap" style="padding-top:26px"><div class="card">'+
+      '<h2 style="margin-bottom:4px">Verify identity &amp; coverage</h2>'+
+      '<p class="muted" style="margin-bottom:18px">Required before your first visit. Photos are encrypted and shared only with your care team.</p>'+
+      '<form class="form" onsubmit="return CP.doVerify(event)">'+
+        '<div class="section-label">Photo ID</div>'+
+        '<label class="uploader" id="up_id"><span class="uic">'+icon("card",20)+'</span><span><span class="ut">Driver\'s license or state ID</span><span class="us" id="id_s">Tap to upload a photo</span></span><input type="file" accept="image/*" onchange="CP.pickFile(this,\'id\')"></label>'+
+        '<div id="id_prev"></div>'+
+        '<div class="section-label" style="margin-top:8px">Insurance</div>'+
+        '<label class="checkline"><input type="checkbox" id="selfpay" onchange="CP.toggleSelfPay(this)"> I\'ll self-pay (no insurance)</label>'+
+        '<div id="insFields">'+
+          '<label class="fld">Insurance carrier<input name="payer" placeholder="e.g. Aetna, Blue Cross"></label>'+
+          '<div class="row2"><label class="fld">Member ID<input name="member"></label><label class="fld">Group # (optional)<input name="group"></label></div>'+
+          '<div class="row2" style="margin-top:2px"><label class="uploader" id="up_front"><span class="uic">'+icon("card",20)+'</span><span><span class="ut">Card front</span><span class="us" id="front_s">Upload photo</span></span><input type="file" accept="image/*" onchange="CP.pickFile(this,\'front\')"></label><label class="uploader" id="up_back"><span class="uic">'+icon("card",20)+'</span><span><span class="ut">Card back</span><span class="us" id="back_s">Upload photo</span></span><input type="file" accept="image/*" onchange="CP.pickFile(this,\'back\')"></label></div>'+
+        '</div>'+
+        '<div class="section-label" style="margin-top:8px">Consent</div>'+
+        '<label class="checkline"><input type="checkbox" required> I have read and agree to the Telehealth Informed Consent.</label>'+
+        '<label class="checkline"><input type="checkbox" required> I acknowledge the Notice of Privacy Practices (HIPAA).</label>'+
+        '<label class="checkline"><input type="checkbox" required> I agree to the Terms of Service and Privacy Policy.</label>'+
+        '<div class="err" id="vErr"></div>'+
+        '<button class="btn block" type="submit">'+icon("lock",17)+' Submit &amp; schedule</button>'+
+      '</form></div></section>'+footer();
+  }
 
   /* ================= AUTH + ONBOARDING ================= */
   function signup(){return topbar()+'<section class="app-wrap" style="padding-top:34px"><div class="card"><h2 style="margin-bottom:4px">Create your account</h2><p class="muted" style="margin-bottom:20px">A few details and you\'re in. In this demo your account is stored only in your browser.</p><form class="form" onsubmit="return CP.doSignup(event)"><div class="row2"><label class="fld">First name<input name="first" required></label><label class="fld">Last name<input name="last" required></label></div><label class="fld">Email<input name="email" type="email" required></label><label class="fld">Password<input name="pw" type="password" minlength="6" required></label><label class="checkline"><input type="checkbox" required> I confirm I am 18 or older and agree to the Terms and Privacy Policy.</label><div class="err" id="suErr"></div><button class="btn block" type="submit">Create account</button></form><p class="muted" style="text-align:center;margin-top:16px">Already have an account? <a href="#/login" style="color:var(--brand);font-weight:600">Sign in</a></p></div></section>'+footer();}
@@ -543,7 +611,13 @@
     var slugs=[["gad-7","GAD-7","anxiety"],["phq-9","PHQ-9","depression"]];
     var body='<section class="screen"><h2>My care</h2>';
     var ik=me().intake;
-    if(ik)body+='<div class="section-label">Your intake</div><div class="list-card" style="flex-direction:column;align-items:stretch;gap:7px;margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="t">'+esc(ik.label)+' check-in</div><span class="badge '+(ik.hi?"warn":"pos")+'">'+(ik.hi?"a visit would help":"low signal")+'</span></div><div class="s" style="font-variant-numeric:tabular-nums">Score '+ik.score+' / '+ik.max+' · shared with your provider before your first visit</div></div>';
+    if(ik&&ik.results){
+      body+='<div class="section-label">Your intake summary</div><div class="list-card" style="flex-direction:column;align-items:stretch;gap:10px;margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="t">Provider notes '+icon("spark",15)+'</div><span class="badge pos">'+ik.items+' items</span></div><p class="s" style="line-height:1.55">'+esc(ik.summary)+'</p>'+
+        (ik.flags&&ik.flags.length?'<div class="stack" style="gap:7px">'+ik.flags.map(function(f){return '<div class="s" style="display:flex;gap:8px;align-items:flex-start;color:var(--ink)"><span style="color:'+(f.sev==="critical"?"var(--danger)":f.sev==="high"?"var(--clay)":"var(--brand)")+'">●</span>'+esc(f.text)+'</div>';}).join("")+'</div>':"")+
+        '<div class="sp" style="margin-top:2px">'+ik.results.map(function(r){return '<span class="pill '+(r.sev==="moderate"||r.sev==="elevated"?"":"done")+'">'+esc(r.label)+': '+r.sev+'</span>';}).join("")+'</div><div class="s" style="font-size:12px;color:var(--ink-faint)">AI-generated · your provider reviews, diagnoses & signs</div></div>';
+    } else if(ik){
+      body+='<div class="section-label">Your intake</div><div class="list-card" style="flex-direction:column;align-items:stretch;gap:7px;margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="t">'+esc(ik.label)+' check-in</div><span class="badge '+(ik.hi?"warn":"pos")+'">'+(ik.hi?"a visit would help":"low signal")+'</span></div><div class="s" style="font-variant-numeric:tabular-nums">Score '+ik.score+' / '+ik.max+' · shared with your provider before your first visit</div></div>';
+    }
     // care plan tasks
     var tasks=[];store.visits.forEach(function(v,vi){(v.tasks||[]).forEach(function(t,ti){tasks.push({vi:vi,ti:ti,t:t.t,done:t.done});});});
     if(tasks.length){var doneN=tasks.filter(function(t){return t.done;}).length,pct=Math.round(doneN/tasks.length*100);
@@ -568,7 +642,7 @@
   /* ================= dispatch ================= */
   function render(){
     var h=location.hash||"#/";var parts=h.replace(/^#\//,"").split("/");var route=parts[0]||"";
-    var authed=!!me();var appRoutes=["app","appointments","messages","companion","care","onboarding","visit","checkin","checkout"];
+    var authed=!!me();var appRoutes=["app","appointments","messages","companion","care","onboarding","intake","verify","visit","checkin","checkout"];
     if(appRoutes.indexOf(route)>=0&&!authed){location.hash="#/login";return;}
     if(route!=="visit"&&visit&&(visit.stream||visit.timer)){clearInterval(visit.timer);stopCam();visit=null;}
     notifOpen=false;
@@ -578,6 +652,8 @@
     else if(route==="signup")html=authed?goHome():signup();
     else if(route==="login")html=authed?goHome():login();
     else if(route==="onboarding")html=onboarding();
+    else if(route==="intake")html=intake();
+    else if(route==="verify")html=verify();
     else if(route==="app")html=home();
     else if(route==="appointments")html=appointments();
     else if(route==="visit")html=visitRoom(parts[1]);
@@ -618,7 +694,17 @@
 
     doSignup:function(e){e.preventDefault();var f=e.target,email=f.email.value.trim().toLowerCase();if(store.users[email]){document.getElementById("suErr").textContent="That email already has an account. Try signing in.";return false;}store.users[email]={name:f.first.value.trim()+" "+f.last.value.trim(),pw:f.pw.value,profile:null,intake:store.pendingScreen||null};store.session=email;store.pendingScreen=null;persist();toast("Welcome to Calm Point");location.hash="#/onboarding";return false;},
     doLogin:function(e){e.preventDefault();var f=e.target,email=f.email.value.trim().toLowerCase(),u=store.users[email];if(!u||u.pw!==f.pw.value){document.getElementById("liErr").textContent="That email and password didn't match.";return false;}store.session=email;persist();location.hash="#/app";return false;},
-    doOnboard:function(e){e.preventDefault();var f=e.target;me().profile={dob:f.dob.value,state:f.state.value,ec:f.ec.value.trim(),ecp:f.ecp.value.trim(),pharm:f.pharm.value.trim(),reminders:true};persist();toast("You're all set");location.hash="#/appointments";return false;},
+    doOnboard:function(e){e.preventDefault();var f=e.target;me().profile={dob:f.dob.value,state:f.state.value,ec:f.ec.value.trim(),ecp:f.ecp.value.trim(),pharm:f.pharm.value.trim(),reminders:true};persist();toast("You're all set");location.hash=me().intake&&me().intake.results?"#/appointments":"#/intake";return false;},
+    pickFile:function(input,key){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){vfiles[key]={name:f.name,url:r.result};var up=document.getElementById("up_"+key);if(up)up.classList.add("done");var s=document.getElementById(key+"_s");if(s)s.textContent=f.name;var prev=document.getElementById(key+"_prev");if(prev)prev.innerHTML='<img class="thumb" src="'+r.result+'" alt="preview">';};r.readAsDataURL(f);},
+    toggleSelfPay:function(cb){var el=document.getElementById("insFields");if(el)el.style.display=cb.checked?"none":"";},
+    doVerify:function(e){e.preventDefault();var f=e.target,self=document.getElementById("selfpay").checked;
+      if(!vfiles.id){document.getElementById("vErr").textContent="Please upload a photo of your ID.";return false;}
+      if(!self){if(!f.payer.value.trim()||!f.member.value.trim()){document.getElementById("vErr").textContent="Enter your insurance carrier and member ID, or choose self-pay.";return false;}if(!vfiles.front){document.getElementById("vErr").textContent="Please upload a photo of the front of your insurance card.";return false;}}
+      me().verification={idDoc:vfiles.id.name,selfPay:self,payer:self?"":f.payer.value.trim(),member:self?"":f.member.value.trim(),group:self?"":f.group.value.trim(),front:vfiles.front?vfiles.front.name:null,back:vfiles.back?vfiles.back.name:null,consentedAt:Date.now()};
+      persist();vfiles={};notify("Intake complete","Your provider has your history & documents.");toast("Verified — let's find a time");location.hash="#/appointments";return false;},
+    ivChoose:function(v){var flat=ivFlat(),i=iv.idx;iv.answers[i]=v;if(flat[i].safety&&v>0){iv.done="crisis";return ivRender();}setTimeout(function(){if(i+1<flat.length){iv.idx++;ivRender();}else{me().intake=ivAnalyze();persist();iv.done="result";ivRender();}},150);},
+    ivBack:function(){if(iv.idx>0){iv.idx--;ivRender();}},
+    ivReset:function(){iv.idx=0;iv.answers=[];iv.done=null;ivRender();},
     saveSettings:function(e){e.preventDefault();var f=e.target,p=prof();p.state=f.state.value;p.ec=f.ec.value.trim();p.reminders=f.reminders.checked;persist();toast("Changes saved");render();return false;},
 
     pickProvider:function(id){booking={prov:id};renderProviders();var sa=document.getElementById("slotArea");if(sa)sa.scrollIntoView({behavior:reduce?"auto":"smooth",block:"nearest"});},
