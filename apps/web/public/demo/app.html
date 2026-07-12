@@ -357,7 +357,7 @@
     '<section><div class="wrap"><div class="section-label reveal">Membership</div><h2 class="reveal" style="margin-bottom:6px">Simple, honest pricing.</h2><p class="muted reveal" style="margin-bottom:20px">A membership for everything between visits, plus a clear per-visit fee. Cancel anytime.</p><div class="steps" style="grid-template-columns:1fr 1fr"><div class="plan reveal" data-d="1"><div class="t" style="font-weight:600">Membership</div><div class="price">$49<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/mo</span></div><ul><li>Secure messaging with your care team</li><li>Recurring check-ins with trends</li><li>AI companion for skills practice</li></ul></div><div class="plan reveal" data-d="2"><div class="t" style="font-weight:600">Visits</div><div class="price">$95<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/first visit</span></div><ul><li>$75 follow-ups</li><li>Video visits, no waiting room</li><li>AI-assisted notes</li></ul></div></div></div></section>'+footer();
   }
   function step(n,t,b){return '<div class="step reveal" data-d="'+n+'"><div class="n">'+n+'</div><h3>'+t+'</h3><p>'+b+'</p></div>';}
-  function footer(){return '<footer><div class="wrap"><p class="disclaimer">Calm Point is a technology platform supporting telehealth care delivered by licensed providers. This is an interactive demo — accounts and data live only in your browser. If you may be in danger of harming yourself, call or text <a href="tel:988">988</a> or call 911.</p><p>© 2026 Calm Point · Privacy · Terms · Telehealth Consent · HIPAA Notice</p></div></footer>';}
+  function footer(){return '<footer><div class="wrap"><p class="disclaimer">Calm Point is a technology platform supporting telehealth care delivered by licensed providers. This is an interactive demo — accounts and data live only in your browser. If you may be in danger of harming yourself, call or text <a href="tel:988">988</a> or call 911.</p><p><a href="#/provider" style="color:var(--brand);font-weight:600">For providers →</a></p><p style="margin-top:6px">© 2026 Calm Point · Privacy · Terms · Telehealth Consent · HIPAA Notice</p></div></footer>';}
 
   /* ================= SCREENER ================= */
   var sc=null;
@@ -639,6 +639,34 @@
   function ciRender(){var c=document.getElementById("ciCard");if(!c)return;if(ci.done==="crisis")return crisisInto(c,"CP.ciReset()");if(ci.done==="result"){ciSave();c.innerHTML='<div class="result fade"><span class="badge pos">Recorded</span><h3>Thanks for checking in.</h3><p>Your provider will see this, and it\'s now part of your trend.</p><a class="btn" href="#/care">Back to my care</a></div>';return;}var qs=ciItems(),total=qs.length,i=ci.idx,isSafety=i===total-1,pct=Math.round(i/total*100);c.innerHTML='<div class="prog-head"><span>'+QSET[ci.cond].label+' check-in</span><span class="count">'+(i+1)+' of '+total+'</span></div><div class="prog"><i style="width:'+pct+'%"></i></div><div class="fade"><p class="q-help">'+(isSafety?"One more — this one matters to us.":esc(QSET[ci.cond].help))+'</p><p class="q-prompt">'+esc(qs[i])+'</p><div class="opts">'+OPTS4.map(function(o,oi){var s=ci.answers[i]===oi?" sel":"";return '<button class="opt'+s+'" onclick="CP.ciChoose('+oi+')"><span class="num">'+(oi+1)+'</span>'+o+'</button>';}).join("")+'</div></div>';}
   function ciSave(){var clin=ci.answers.slice(0,ciItems().length-1),s=clin.reduce(function(a,b){return a+(b||0);},0);var sev=s<=2?"minimal":s<=5?"mild":"moderate";store.checkins[ci.slug]=(store.checkins[ci.slug]||[]).concat([{ts:Date.now(),score:s,sev:sev}]);persist();}
 
+  /* ================= PROVIDER DASHBOARD (preview) ================= */
+  var pvSel=null;
+  function providerDash(){
+    var patients=Object.keys(store.users).map(function(k){return store.users[k];}).filter(function(u){return u.intake&&u.intake.results;});
+    var sel=patients.filter(function(u){return u.name===pvSel;})[0]||null;
+    var top='<div class="app-top"><div class="app-top-in"><div class="brand" onclick="location.hash=\'#/\'">'+logo()+'<span>Calm Point</span></div><div class="bar-links"><span class="demo-tag">Provider preview</span>'+themeBtn()+'</div></div></div>';
+    var inbox='<section class="screen"><h2>Provider dashboard</h2><p class="muted" style="margin-top:-6px;margin-bottom:16px">Dr. Priya Rivera, PMHNP-BC · intake review</p>'+
+      '<div class="section-label">Intake inbox</div>'+
+      (patients.length?'<div class="stack">'+patients.map(function(u){var a=u.intake,crit=a.flags.filter(function(f){return f.sev==="critical";}).length,hi=a.flags.filter(function(f){return f.sev==="high";}).length;var top=a.flags[0];return '<div class="list-card nav-card" data-name="'+esc(u.name)+'" onclick="CP.pvReview(this)"><div style="display:flex;align-items:center;gap:12px"><span class="avatar-sm ink">'+esc(initials(u.name))+'</span><div><div class="t">'+esc(u.name)+'</div><div class="s">'+(top?esc(top.text):"Intake complete")+'</div></div></div><span class="badge '+(crit?"warn":hi?"warn":"pos")+'">'+(crit?"urgent":hi?"review":"new")+'</span></div>';}).join("")+'</div>':'<div class="empty"><div class="t">No pending intakes</div>Complete a patient intake first (from the patient app) to populate this inbox.</div>')+
+      (sel?providerDetail(sel):"")+
+      '</section>';
+    return top+'<main class="app-wrap">'+inbox+'</main>';
+  }
+  function providerDetail(u){var a=u.intake,first=u.name.split(" ")[0];
+    var soap=u.provNote||{
+      s:"Patient completed a validated intake battery ("+a.items+" items) prior to the visit. Chief concerns to explore per screening below.",
+      o:"Telehealth video visit scheduled. Identity and coverage verified during intake.",
+      a:"AI decision-support draft: "+a.summary,
+      p:"Confirm history at visit; discuss options; agree on a plan and follow-up. Provider to diagnose and sign."};
+    return '<div style="margin-top:22px" class="fade"><div class="section-label">Reviewing · '+esc(u.name)+'</div>'+
+      (a.flags.length?'<div class="stack" style="margin-bottom:14px">'+a.flags.map(function(f){return '<div class="list-card" style="border-left:3px solid '+(f.sev==="critical"?"var(--danger)":f.sev==="high"?"var(--clay)":"var(--brand)")+'"><div class="s" style="color:var(--ink)">'+esc(f.text)+'</div></div>';}).join("")+'</div>':"")+
+      '<div class="list-card" style="flex-direction:column;align-items:stretch;gap:6px;margin-bottom:14px"><div class="t">AI pre-visit summary</div><p style="font-size:14px;line-height:1.55;color:var(--ink-soft)">'+esc(a.summary)+'</p></div>'+
+      '<div class="section-label">Screening profile</div><div class="stack" style="margin-bottom:16px">'+a.results.map(function(r){return '<div class="list-card"><div><div class="t">'+esc(r.label)+'</div><div class="s">'+esc(r.title)+' · '+r.score+' / '+r.max+'</div></div><span class="badge '+(r.sev==="moderate"||r.sev==="elevated"?"warn":"pos")+'">'+r.sev+'</span></div>';}).join("")+'</div>'+
+      '<div class="card" style="border-radius:16px;box-shadow:var(--shadow-soft);padding:18px"><div class="section-label">SOAP note (AI draft — you are the author of record)</div>'+
+      '<form class="form" onsubmit="return CP.pvSign(event)"><label class="fld" style="font-size:13px">Subjective<textarea name="s" rows="2">'+esc(soap.s)+'</textarea></label><label class="fld" style="font-size:13px">Objective<textarea name="o" rows="2">'+esc(soap.o)+'</textarea></label><label class="fld" style="font-size:13px">Assessment<textarea name="a" rows="3">'+esc(soap.a)+'</textarea></label><label class="fld" style="font-size:13px">Plan<textarea name="p" rows="2">'+esc(soap.p)+'</textarea></label>'+
+      (u.provNoteSignedAt?'<span class="badge pos">Signed '+new Date(u.provNoteSignedAt).toLocaleDateString()+'</span>':'<button class="btn small" type="submit">'+icon("check",16)+' Sign &amp; finalize note</button>')+'</form></div></div>';
+  }
+
   /* ================= dispatch ================= */
   function render(){
     var h=location.hash||"#/";var parts=h.replace(/^#\//,"").split("/");var route=parts[0]||"";
@@ -662,6 +690,7 @@
     else if(route==="companion")html=companion();
     else if(route==="care")html=care();
     else if(route==="checkin")html=checkinScreen(parts[1],parts[2]);
+    else if(route==="provider")html=providerDash();
     else html=landing();
     root.innerHTML=html;window.scrollTo(0,0);
     if(route===""){startField();initReveal();}
@@ -749,6 +778,8 @@
     startCheckin:function(slug,cond){location.hash="#/checkin/"+slug+"/"+cond;},
     ciChoose:function(v){var qs=ciItems(),i=ci.idx;ci.answers[i]=v;if(i===qs.length-1&&v>0){ci.done="crisis";return ciRender();}setTimeout(function(){if(i+1<qs.length){ci.idx++;ciRender();}else{ci.done="result";ciRender();}},150);},
     ciReset:function(){ci.idx=0;ci.answers=[];ci.done=null;ciRender();},
+    pvReview:function(el){pvSel=el.getAttribute("data-name");render();var t=document.querySelector(".fade");if(t)t.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});},
+    pvSign:function(e){e.preventDefault();var f=e.target,k=Object.keys(store.users).filter(function(k){return store.users[k].name===pvSel;})[0],u=k?store.users[k]:null;if(u){u.provNote={s:f.s.value,o:f.o.value,a:f.a.value,p:f.p.value};u.provNoteSignedAt=Date.now();persist();}toast("Note signed & finalized");render();return false;},
     toggleTask:function(vi,ti){store.visits[vi].tasks[ti].done=!store.visits[vi].tasks[ti].done;persist();render();}
   };
 
