@@ -165,7 +165,9 @@ async function seedQuestionnaires() {
               ...(q.shadedMin !== undefined ? { shadedMin: q.shadedMin } : {}),
             },
             options: {
-              create: instrument.options.map((option, optionOrder) => ({
+              // Per-question option scales (ISI, AUDIT-C) override the
+              // instrument-level default when present.
+              create: (q.options ?? instrument.options).map((option, optionOrder) => ({
                 order: optionOrder,
                 label: option.label,
                 value: option.value,
