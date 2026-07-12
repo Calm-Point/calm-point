@@ -11,6 +11,29 @@ the phase status board) and obeys `05-compliance.md` (HIPAA) and `06-ai-features
 (AI safety). **Nothing here diagnoses or prescribes — the AI is decision-support; a
 licensed provider reviews, diagnoses, and signs.**
 
+## Build status (updated 2026-07-12)
+
+Backend, all typecheck-clean + unit-tested + compiled in a full production build
+(runtime-verified on Vercel once keys/BAAs are in — sandbox egress blocks the vendors):
+
+- ✅ **Validated 45-item intake battery** — PHQ-9, GAD-7, ASRS, ISI, AUDIT-C, PC-PTSD-5
+  (37 scored items) with canonical cutoffs; 44 unit tests.
+- ✅ **AI ensemble analysis** — Claude + Gemini drafts, Claude reconciler, deterministic
+  risk flags, `IntakeAnalysis` model; feature-flagged OFF; `POST/GET /api/v1/intake/analyze`.
+  Gemini request shape live-verified.
+- ✅ **Stripe** — visit Payment Intents ($95/$75), $49/mo subscription, signed idempotent
+  webhook; PHI-free. `/api/v1/payments/*`.
+- ✅ **Resend email + Twilio SMS** — booking confirmations (patient+provider) and
+  24h / 1h / **5-min** reminders with secure join links; cron `*/5`.
+- ✅ **Identity / insurance / consent capture** — `IdentityDocument`, `InsurancePolicy`,
+  versioned `ConsentRecord`; encrypted object-storage keys only. `/api/v1/intake/{identity,insurance,consent}`.
+- ✅ **Provider onboarding** — admin create (profile+licenses+availability+invite),
+  credentialing gate, intake inbox. `/api/v1/admin/providers*`, `/api/v1/provider/analyses`.
+
+Remaining: front-end flows that administer the battery + capture steps + analysis views
+in the real app UI; provider dashboard wiring to the new inbox API; award-tier aesthetics
++ scroll animations across landing/app/provider; the client demo embodying the full funnel.
+
 ---
 
 ## 0. Vendor stack (all behind abstractions; swappable)
