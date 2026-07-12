@@ -15,6 +15,19 @@ describe("reminder tiers", () => {
     expect(dueTiers(24 * 60 + 1)).toEqual([]);
     expect(dueTiers(22 * 60)).toEqual([]);
   });
+
+  it("fires the 5-minute tier inside the final ~5 minutes only", () => {
+    expect(dueTiers(5)).toEqual(["5m"]);
+    expect(dueTiers(6)).toEqual(["5m"]);
+    expect(dueTiers(7)).toEqual([]);
+    expect(dueTiers(0)).toEqual([]); // visit already starting — no reminder
+  });
+
+  it("tiers never overlap for any minutesOut", () => {
+    for (let m = 0; m <= 24 * 60 + 5; m++) {
+      expect(dueTiers(m).length).toBeLessThanOrEqual(1);
+    }
+  });
 });
 
 describe("ICS generation", () => {
