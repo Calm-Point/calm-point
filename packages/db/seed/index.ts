@@ -194,6 +194,7 @@ async function seedFlags() {
     { key: "ai-therapist", enabled: false, description: "AI Therapist — OFF until clinical + legal sign-off (CLAUDE.md)" },
     { key: "ai-scribe", enabled: false, description: "AI visit scribe — consent-gated; OFF until quality bar approved" },
     { key: "erx", enabled: false, description: "e-prescribing — post-launch project" },
+    { key: "intake_ai_analysis", enabled: false, description: "AI intake analysis (Claude+Gemini ensemble) — OFF until clinical + legal sign-off" },
     { key: "video-vendor", enabled: true, description: "Active video vendor selection (value: zoom|daily)" },
   ];
   for (const flag of flags) {
