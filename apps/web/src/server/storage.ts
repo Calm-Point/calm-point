@@ -30,6 +30,50 @@ export async function putText(key: string, text: string): Promise<string> {
   return `local:${safeKey}`;
 }
 
+/**
+ * Store a binary object (e.g. an ID or insurance-card photo). Returns an opaque
+ * storage key — never a public URL. Access is via signed URLs behind
+ * authorization. Production uses S3 with SSE; local dev writes to disk.
+ */
+export async function putBinary(
+  key: string,
+  data: Buffer,
+  _contentType: string,
+): Promise<string> {
+  if (process.env.S3_BUCKET) {
+    // TODO(infra): @aws-sdk/client-s3 PutObject with SSE-KMS + ContentType once
+    // bucket credentials are provisioned. Interface is stable.
+    throw new Error("S3 storage not yet wired — unset S3_BUCKET to use local dev storage");
+  }
+  assertNotProd();
+  const safeKey = key.replace(/[^a-zA-Z0-9/_.-]/g, "_");
+  const file = path.join(LOCAL_ROOT, safeKey);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, data);
+  return `local:${safeKey}`;
+}
+
+/** Max upload size for identity/insurance photos (8 MB). */
+export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic"]);
+
+/**
+ * Decode a `data:` URL image, enforcing type + size. Throws on anything that
+ * isn't an allowed image within the size limit.
+ */
+export function decodeImageDataUrl(dataUrl: string): { buffer: Buffer; contentType: string } {
+  const match = /^data:([^;,]+);base64,(.+)$/s.exec(dataUrl);
+  if (!match) throw new Error("Expected a base64 data URL");
+  const contentType = match[1]!.toLowerCase();
+  if (!ALLOWED_IMAGE_TYPES.has(contentType)) {
+    throw new Error("Unsupported image type");
+  }
+  const buffer = Buffer.from(match[2]!, "base64");
+  if (buffer.byteLength === 0) throw new Error("Empty image");
+  if (buffer.byteLength > MAX_UPLOAD_BYTES) throw new Error("Image too large");
+  return { buffer, contentType };
+}
+
 export async function getText(storageKey: string): Promise<string> {
   if (storageKey.startsWith("local:")) {
     assertNotProd();
