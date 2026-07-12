@@ -30,9 +30,19 @@ Backend, all typecheck-clean + unit-tested + compiled in a full production build
 - ✅ **Provider onboarding** — admin create (profile+licenses+availability+invite),
   credentialing gate, intake inbox. `/api/v1/admin/providers*`, `/api/v1/provider/analyses`.
 
-Remaining: front-end flows that administer the battery + capture steps + analysis views
-in the real app UI; provider dashboard wiring to the new inbox API; award-tier aesthetics
-+ scroll animations across landing/app/provider; the client demo embodying the full funnel.
+**Client demo — full both-sided funnel, certified end-to-end (9/9 flows, zero JS errors):**
+- ✅ landing (scroll-reveal animations) → screener → signup → onboarding
+- ✅ **34-item validated intake battery** (PHQ-9, GAD-7, ASRS, ISI, PC-PTSD-5) → **AI analysis**
+  with prioritized risk flags + screening profile (decision-support framing)
+- ✅ **identity + insurance + consent verification** (ID photo, card photos / self-pay, consents)
+- ✅ provider match (state licensure) → booking calendar → **Stripe-style checkout** →
+  **real-webcam video visit** → after-visit care plan → messaging → AI companion (crisis divert)
+- ✅ **provider dashboard**: intake inbox with risk triage, AI pre-visit summary, screening
+  profile, signable SOAP note.
+
+Remaining (continuous / externally gated): further award-tier aesthetic polish across the real
+app UI; **Gemini-generated imagery is blocked on Google billing** (enable at ai.dev); the real
+app's Next.js UI pages that drive the new endpoints go live once Vercel + DATABASE_URL are set.
 
 ---
 
