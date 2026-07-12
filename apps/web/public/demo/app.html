@@ -244,6 +244,10 @@
   footer a{color:var(--brand);text-decoration:none}
   .disclaimer{max-width:62ch;margin:0 auto 12px;line-height:1.55}
   .fade{animation:fade .4s var(--ease) both}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease),transform .8s var(--ease);will-change:opacity,transform}
+  .reveal.in{opacity:1;transform:none}
+  .reveal[data-d="1"]{transition-delay:.06s}.reveal[data-d="2"]{transition-delay:.14s}.reveal[data-d="3"]{transition-delay:.22s}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
   @keyframes fade{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){.fade,.screen{animation:none}.prog>i{transition:none}.stage .live i{animation:none}}
   @media (max-width:560px){.bar-links .nav-link{display:none}}
@@ -342,10 +346,10 @@
   /* ================= LANDING ================= */
   function landing(){
     return topbar()+'<div class="hero"><div class="field" aria-hidden="true"><canvas id="fieldCanvas"></canvas></div><div class="wrap"><span class="eyebrow">Calm Point</span><h1>Mental health care that meets you where you are</h1><p class="lede">Licensed providers for ADHD, anxiety, depression and more. A private two-minute check-in, a video visit within days, and real support between appointments.</p><div class="cta-row"><a class="btn" href="#/screener/anxiety">Start your free check-in</a><a class="btn ghost" href="#how">See how it works</a></div><p class="crisis-line">Not for emergencies. In crisis, call or text <a href="tel:988">988</a> — available 24/7.</p><div class="conditions">'+Object.keys(QSET).map(function(k){var ci={anxiety:"leaf",depression:"heart",adhd:"bolt",sleep:"moon",weight:"care"};return '<button class="chip" onclick="location.hash=\'#/screener/'+k+'\'">'+icon(ci[k]||"spark",17)+QSET[k].label+'</button>';}).join("")+'</div></div></div>'+
-    '<section id="how"><div class="wrap"><div class="section-label">How care works</div><h2 style="margin-bottom:22px">Real clinicians, real plans — no waiting rooms.</h2><div class="steps">'+step(1,"Check in","Answer a short, clinically validated questionnaire. Private, and it helps your provider understand what you're experiencing.")+step(2,"Meet your provider","Book a video visit — most new patients get in within days. Your provider reviews your check-in first.")+step(3,"Feel supported","Leave with a clear plan, then message your care team and track your progress between visits.")+'</div></div></section>'+
-    '<section><div class="wrap"><div class="section-label">Membership</div><h2 style="margin-bottom:6px">Simple, honest pricing.</h2><p class="muted" style="margin-bottom:20px">A membership for everything between visits, plus a clear per-visit fee. Cancel anytime.</p><div class="steps" style="grid-template-columns:1fr 1fr"><div class="plan"><div class="t" style="font-weight:600">Membership</div><div class="price">$49<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/mo</span></div><ul><li>Secure messaging with your care team</li><li>Recurring check-ins with trends</li><li>AI companion for skills practice</li></ul></div><div class="plan"><div class="t" style="font-weight:600">Visits</div><div class="price">$95<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/first visit</span></div><ul><li>$75 follow-ups</li><li>Video visits, no waiting room</li><li>AI-assisted notes</li></ul></div></div></div></section>'+footer();
+    '<section id="how"><div class="wrap"><div class="section-label reveal">How care works</div><h2 class="reveal" style="margin-bottom:22px">Real clinicians, real plans — no waiting rooms.</h2><div class="steps">'+step(1,"Check in","Answer a short, clinically validated questionnaire. Private, and it helps your provider understand what you're experiencing.")+step(2,"Meet your provider","Book a video visit — most new patients get in within days. Your provider reviews your check-in first.")+step(3,"Feel supported","Leave with a clear plan, then message your care team and track your progress between visits.")+'</div></div></section>'+
+    '<section><div class="wrap"><div class="section-label reveal">Membership</div><h2 class="reveal" style="margin-bottom:6px">Simple, honest pricing.</h2><p class="muted reveal" style="margin-bottom:20px">A membership for everything between visits, plus a clear per-visit fee. Cancel anytime.</p><div class="steps" style="grid-template-columns:1fr 1fr"><div class="plan reveal" data-d="1"><div class="t" style="font-weight:600">Membership</div><div class="price">$49<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/mo</span></div><ul><li>Secure messaging with your care team</li><li>Recurring check-ins with trends</li><li>AI companion for skills practice</li></ul></div><div class="plan reveal" data-d="2"><div class="t" style="font-weight:600">Visits</div><div class="price">$95<span style="font-size:15px;color:var(--ink-soft);font-weight:400">/first visit</span></div><ul><li>$75 follow-ups</li><li>Video visits, no waiting room</li><li>AI-assisted notes</li></ul></div></div></div></section>'+footer();
   }
-  function step(n,t,b){return '<div class="step"><div class="n">'+n+'</div><h3>'+t+'</h3><p>'+b+'</p></div>';}
+  function step(n,t,b){return '<div class="step reveal" data-d="'+n+'"><div class="n">'+n+'</div><h3>'+t+'</h3><p>'+b+'</p></div>';}
   function footer(){return '<footer><div class="wrap"><p class="disclaimer">Calm Point is a technology platform supporting telehealth care delivered by licensed providers. This is an interactive demo — accounts and data live only in your browser. If you may be in danger of harming yourself, call or text <a href="tel:988">988</a> or call 911.</p><p>© 2026 Calm Point · Privacy · Terms · Telehealth Consent · HIPAA Notice</p></div></footer>';}
 
   /* ================= SCREENER ================= */
@@ -584,7 +588,7 @@
     else if(route==="checkin")html=checkinScreen(parts[1],parts[2]);
     else html=landing();
     root.innerHTML=html;window.scrollTo(0,0);
-    if(route==="")startField();
+    if(route===""){startField();initReveal();}
     if(route==="screener")scRender();
     // mark notifs read when opening app home
     if(route==="app"){store.notifs.forEach(function(n){n.read=true;});persist();}
@@ -592,6 +596,14 @@
   function goHome(){location.hash="#/app";return "";}
 
   var fieldRAF;
+  var revealObs;
+  function initReveal(){
+    if(revealObs)revealObs.disconnect();
+    var els=[].slice.call(document.querySelectorAll(".reveal"));
+    if(reduce||!("IntersectionObserver" in window)){els.forEach(function(e){e.classList.add("in");});return;}
+    revealObs=new IntersectionObserver(function(ents){ents.forEach(function(en){if(en.isIntersecting){en.target.classList.add("in");revealObs.unobserve(en.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});
+    els.forEach(function(e){revealObs.observe(e);});
+  }
   function startField(){var cv=document.getElementById("fieldCanvas");if(!cv)return;var ctx=cv.getContext("2d"),t=0,DPR=Math.min(2,window.devicePixelRatio||1);var blobs=[];for(var i=0;i<5;i++)blobs.push({x:Math.random(),y:Math.random(),r:.28+Math.random()*.22,p:Math.random()*6.28,s:.4+Math.random()*.5});function col(){return getComputedStyle(rootEl).getPropertyValue("--brand").trim()||"#3e6b5c";}function hexA(hex,a){hex=hex.replace("#","");if(hex.length===3)hex=hex.split("").map(function(c){return c+c;}).join("");var n=parseInt(hex,16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";}function draw(){cv.width=cv.clientWidth*DPR;cv.height=cv.clientHeight*DPR;var w=cv.width,hh=cv.height;ctx.clearRect(0,0,w,hh);var cc=col();for(var i=0;i<blobs.length;i++){var b=blobs[i],br=reduce?1:1+Math.sin(t*6e-4*b.s+b.p)*.12,cx=b.x*w,cy=b.y*hh*.9,rad=b.r*Math.min(w,hh)*br,g=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);g.addColorStop(0,hexA(cc,.1));g.addColorStop(1,hexA(cc,0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,rad,0,6.2832);ctx.fill();}if(!reduce){t+=16;fieldRAF=requestAnimationFrame(draw);}}cancelAnimationFrame(fieldRAF);draw();}
 
   /* ================= actions ================= */
