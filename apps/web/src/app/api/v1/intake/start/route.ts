@@ -28,7 +28,7 @@ const INTAKE_TTL_DAYS = 30;
  */
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (!rateLimit(`intake-start:${ip}`, 20, 60_000)) {
+  if (!(await rateLimit(`intake-start:${ip}`, 20, 60_000))) {
     return Response.json({ error: "Too many attempts" }, { status: 429 });
   }
 

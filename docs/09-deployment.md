@@ -69,6 +69,48 @@ Do **NOT** set `ALLOW_DEV_VIDEO` / `ALLOW_LOCAL_STORAGE` / `ALLOW_MOCK_AI` in an
 
 `patient@calmpoint.dev` / `provider@calmpoint.dev` / `provider2@calmpoint.dev` / `admin@calmpoint.dev` — password `CalmPoint-Dev-2026!`. Provider/admin will be walked through TOTP enrollment on first login. **Rotate or delete these before real launch** (tracked in launch plan §pre-launch).
 
+## Key management (MFA secrets, KMS migration path)
+
+`apps/web/src/server/auth/mfa.ts` encrypts TOTP secrets at rest (AES-256-GCM) with
+a key derived from `AUTH_SECRET` (`sha256("mfa:" + AUTH_SECRET)`). The same
+`encryptSecret`/`decryptSecret` pair is reused in
+`apps/web/src/app/api/v1/intake/insurance/route.ts` to encrypt insurance
+member/group IDs. This is a deliberate stopgap, not a mistake to "fix" by
+rewriting the crypto — `AUTH_SECRET` is already a securely generated, rotatable
+secret and the derivation is sound. The gap is *operational*: one env var
+protects both the session-signing key and the data-encryption key, so
+rotating one forces rotating the other, and there's no audit trail of who
+accessed the raw key material. Neither is acceptable once real PHI (patient
+DOB, insurance IDs) depends on it. 🚦 **Do this migration before production
+PHI**, not after — a live migration of encrypted-in-place data is far more
+disruptive than starting with the KMS path from day one on Supabase/Vercel.
+
+**Migration plan:**
+1. Provision a dedicated symmetric key (AWS KMS `GenerateDataKey` /
+   `Decrypt`, or a secrets-manager equivalent) — a **separate** key from
+   anything used for session signing.
+2. Replace `encryptionKey()` in `mfa.ts`: instead of deriving from
+   `AUTH_SECRET`, call KMS `Decrypt` on a stored, KMS-encrypted data key (the
+   standard envelope-encryption pattern — avoids a network round trip to KMS
+   on every MFA check) and cache the decrypted data key in memory for the
+   life of the process. `encryptSecret`/`decryptSecret`'s AES-256-GCM logic
+   underneath doesn't change at all — only where the 32-byte key comes from.
+3. **Re-encrypt existing rows**: decrypt every `User.mfaSecret` and
+   `InsurancePolicy.memberId`/`groupNumber` with the old derived key, then
+   re-encrypt with the new KMS-backed key, in a single migration script run
+   with both keys available simultaneously. Do this during a maintenance
+   window — there's no way to support both key sources at once without
+   tagging ciphertext with a key version, which is unwarranted complexity
+   for a one-time cutover.
+4. Grant KMS `Decrypt`/`GenerateDataKey` permission only to the app's
+   runtime role (least privilege — matches docs/05 §8's existing
+   least-privilege DB role stance), and enable KMS key-usage CloudTrail
+   logging so decrypt calls are independently auditable, not just inferred
+   from `AuditEvent` rows.
+5. Rotate `AUTH_SECRET` afterward — it no longer needs to double as
+   encryption key material, so it can rotate on its own schedule without
+   touching stored ciphertext.
+
 ## Compliance reminders (docs/05)
 
-Hosted staging with synthetic data is fine. Before ANY real patient data: Vercel BAA-capable plan 🚦, Supabase HIPAA add-on + BAA 🚦, S3 storage wired (local blob storage is refused in production), and the launch-plan §pre-launch checklist.
+Hosted staging with synthetic data is fine. Before ANY real patient data: Vercel BAA-capable plan 🚦, Supabase HIPAA add-on + BAA 🚦, S3 storage (code wired behind `putText`/`putBinary` — needs a real bucket + IAM role + `S3_KMS_KEY_ID` provisioned; local blob storage is refused in production without `ALLOW_LOCAL_STORAGE=1`), the KMS migration above, and the launch-plan §pre-launch checklist.

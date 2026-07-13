@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     if (!stripeConfigured()) {
       return Response.json({ error: "Payments not configured" }, { status: 503 });
     }
-    if (!rateLimit(`sub:${user.id}`, 8, 60_000)) {
+    if (!(await rateLimit(`sub:${user.id}`, 8, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
 

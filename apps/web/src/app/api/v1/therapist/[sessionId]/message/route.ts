@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const user = await requireRole("PATIENT");
-    if (!rateLimit(`therapist-turn:${user.id}`, 30, 60_000)) {
+    if (!(await rateLimit(`therapist-turn:${user.id}`, 30, 60_000))) {
       return Response.json({ error: "One breath at a time — try again in a moment." }, { status: 429 });
     }
     const parsed = schema.safeParse(await req.json().catch(() => null));

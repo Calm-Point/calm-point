@@ -5,7 +5,7 @@ import { rateLimit } from "@/server/rate-limit";
 export async function POST() {
   try {
     const user = await requireRole("PATIENT");
-    if (!rateLimit(`therapist-start:${user.id}`, 10, 3_600_000)) {
+    if (!(await rateLimit(`therapist-start:${user.id}`, 10, 3_600_000))) {
       return Response.json({ error: "Too many sessions — take a breather." }, { status: 429 });
     }
     const session = await startSession(user);

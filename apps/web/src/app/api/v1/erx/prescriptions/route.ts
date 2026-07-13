@@ -24,7 +24,7 @@ const createSchema = z.object({
 export async function POST(req: Request) {
   try {
     const user = await requireRole("PROVIDER");
-    if (!rateLimit(`erx:${user.id}`, 20, 60_000)) {
+    if (!(await rateLimit(`erx:${user.id}`, 20, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
 

@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
 /**
  * Object storage seam for transcripts/attachments (docs/03 §5). Production
- * uses S3 with SSE (implementation lands with infra keys — the interface is
- * frozen here). Dev/CI uses a local directory. Local mode is refused in
- * production because serverless filesystems are ephemeral.
+ * uses S3 with SSE-KMS; dev/CI uses a local directory. Local mode is refused
+ * in production because serverless filesystems are ephemeral.
  */
 
 const LOCAL_ROOT = path.join(process.cwd(), ".data", "blobs");
@@ -16,11 +16,50 @@ function assertNotProd() {
   }
 }
 
+let s3Client: S3Client | null = null;
+function s3(): S3Client {
+  s3Client ??= new S3Client({ region: process.env.S3_REGION ?? "us-east-1" });
+  return s3Client;
+}
+
+function sseParams() {
+  const kmsKeyId = process.env.S3_KMS_KEY_ID;
+  return kmsKeyId
+    ? { ServerSideEncryption: "aws:kms" as const, SSEKMSKeyId: kmsKeyId }
+    : { ServerSideEncryption: "AES256" as const };
+}
+
+async function streamToString(body: unknown): Promise<string> {
+  // The AWS SDK v3 response body is a Node Readable in this runtime.
+  const chunks: Buffer[] = [];
+  for await (const chunk of body as AsyncIterable<Buffer>) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+async function s3GetText(bucket: string, key: string): Promise<string> {
+  const res = await s3().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  return streamToString(res.Body);
+}
+
+async function s3PutText(bucket: string, key: string, text: string, contentType = "text/plain"): Promise<void> {
+  await s3().send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: text,
+      ContentType: contentType,
+      ...sseParams(),
+    }),
+  );
+}
+
 export async function putText(key: string, text: string): Promise<string> {
-  if (process.env.S3_BUCKET) {
-    // TODO(phase-3.3): @aws-sdk/client-s3 PutObject with SSE-KMS once bucket
-    // credentials are provisioned. Interface is stable; callers won't change.
-    throw new Error("S3 storage not yet wired — unset S3_BUCKET to use local dev storage");
+  const bucket = process.env.S3_BUCKET;
+  if (bucket) {
+    await s3PutText(bucket, key, text);
+    return `s3:${key}`;
   }
   assertNotProd();
   const safeKey = key.replace(/[^a-zA-Z0-9/_.-]/g, "_");
@@ -35,15 +74,19 @@ export async function putText(key: string, text: string): Promise<string> {
  * storage key — never a public URL. Access is via signed URLs behind
  * authorization. Production uses S3 with SSE; local dev writes to disk.
  */
-export async function putBinary(
-  key: string,
-  data: Buffer,
-  _contentType: string,
-): Promise<string> {
-  if (process.env.S3_BUCKET) {
-    // TODO(infra): @aws-sdk/client-s3 PutObject with SSE-KMS + ContentType once
-    // bucket credentials are provisioned. Interface is stable.
-    throw new Error("S3 storage not yet wired — unset S3_BUCKET to use local dev storage");
+export async function putBinary(key: string, data: Buffer, contentType: string): Promise<string> {
+  const bucket = process.env.S3_BUCKET;
+  if (bucket) {
+    await s3().send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: data,
+        ContentType: contentType,
+        ...sseParams(),
+      }),
+    );
+    return `s3:${key}`;
   }
   assertNotProd();
   const safeKey = key.replace(/[^a-zA-Z0-9/_.-]/g, "_");
@@ -79,13 +122,39 @@ export async function getText(storageKey: string): Promise<string> {
     assertNotProd();
     return fs.readFile(path.join(LOCAL_ROOT, storageKey.slice("local:".length)), "utf8");
   }
+  if (storageKey.startsWith("s3:")) {
+    const bucket = process.env.S3_BUCKET;
+    if (!bucket) throw new Error("S3_BUCKET is not configured but an s3: key was requested");
+    return s3GetText(bucket, storageKey.slice("s3:".length));
+  }
   throw new Error(`Unsupported storage key scheme: ${storageKey}`);
 }
 
+/**
+ * Appends to a stored text object. S3 has no native append — this reads the
+ * current object and writes it back with the new text concatenated, which is
+ * fine for the append volumes here (a transcript accumulates a few dozen
+ * lines over a visit, not thousands) but would need a different design
+ * (multipart parts, or per-chunk objects concatenated at read time) if that
+ * assumption changes.
+ */
 export async function appendText(storageKey: string, text: string): Promise<void> {
   if (storageKey.startsWith("local:")) {
     assertNotProd();
     await fs.appendFile(path.join(LOCAL_ROOT, storageKey.slice("local:".length)), text, "utf8");
+    return;
+  }
+  if (storageKey.startsWith("s3:")) {
+    const bucket = process.env.S3_BUCKET;
+    if (!bucket) throw new Error("S3_BUCKET is not configured but an s3: key was requested");
+    const key = storageKey.slice("s3:".length);
+    let existing = "";
+    try {
+      existing = await s3GetText(bucket, key);
+    } catch (err) {
+      if (!(err instanceof Error) || err.name !== "NoSuchKey") throw err;
+    }
+    await s3PutText(bucket, key, existing + text);
     return;
   }
   throw new Error(`Unsupported storage key scheme: ${storageKey}`);

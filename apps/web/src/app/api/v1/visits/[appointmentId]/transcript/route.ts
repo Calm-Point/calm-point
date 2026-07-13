@@ -21,7 +21,7 @@ export async function POST(
 ) {
   try {
     const user = await requireRole("PATIENT", "PROVIDER");
-    if (!rateLimit(`transcript:${user.id}`, 240, 60_000)) {
+    if (!(await rateLimit(`transcript:${user.id}`, 240, 60_000))) {
       return Response.json({ error: "Too fast" }, { status: 429 });
     }
     const parsed = schema.safeParse(await req.json().catch(() => null));

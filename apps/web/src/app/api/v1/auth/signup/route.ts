@@ -5,7 +5,7 @@ import { rateLimit, clientIp } from "@/server/rate-limit";
 
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (!rateLimit(`signup:${ip}`, 10, 60_000)) {
+  if (!(await rateLimit(`signup:${ip}`, 10, 60_000))) {
     return Response.json({ error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
 

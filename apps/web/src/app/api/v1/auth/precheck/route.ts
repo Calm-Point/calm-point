@@ -12,7 +12,7 @@ const schema = z.object({ email: z.string().email(), password: z.string().min(1)
  */
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (!rateLimit(`precheck:${ip}`, 20, 60_000)) {
+  if (!(await rateLimit(`precheck:${ip}`, 20, 60_000))) {
     return Response.json({ error: "Too many attempts" }, { status: 429 });
   }
 

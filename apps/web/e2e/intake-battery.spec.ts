@@ -40,7 +40,7 @@ test("patient completes the full intake battery then verifies identity, coverage
       .isVisible()
       .catch(() => false);
     if (done) break;
-    const option = page.locator('[role="radiogroup"] button').first();
+    const option = page.locator('[role="group"] button').first();
     await option.waitFor({ state: "visible", timeout: 15_000 });
     await option.click();
     await page.waitForTimeout(120);

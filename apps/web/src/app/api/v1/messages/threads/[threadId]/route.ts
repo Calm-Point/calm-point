@@ -24,7 +24,7 @@ export async function POST(
 ) {
   try {
     const user = await requireRole("PATIENT", "PROVIDER");
-    if (!rateLimit(`msg-send:${user.id}`, 60, 60_000)) {
+    if (!(await rateLimit(`msg-send:${user.id}`, 60, 60_000))) {
       return Response.json({ error: "Too many messages" }, { status: 429 });
     }
     const parsed = sendSchema.safeParse(await req.json().catch(() => null));

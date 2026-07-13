@@ -215,7 +215,7 @@ export function IntakeBatteryClient() {
       />
       {question.helpText ? <p className="mb-1 text-sm text-ink-soft">{question.helpText}</p> : null}
       <h2 className="mb-4 text-lg font-semibold leading-snug">{question.prompt}</h2>
-      <div className="flex flex-col gap-2">
+      <div role="group" aria-label={question.prompt} className="flex flex-col gap-2">
         {question.options.map((option, idx) => (
           <button
             key={option.id}

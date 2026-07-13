@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     if (!stripeConfigured()) {
       return Response.json({ error: "Payments not configured" }, { status: 503 });
     }
-    if (!rateLimit(`provider-billing:${user.id}`, 10, 60_000)) {
+    if (!(await rateLimit(`provider-billing:${user.id}`, 10, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
     const body = (await req.json().catch(() => null)) as { action?: string } | null;

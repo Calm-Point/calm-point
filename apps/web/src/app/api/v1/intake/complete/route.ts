@@ -20,7 +20,7 @@ const completeSchema = z.object({
  */
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (!rateLimit(`intake-complete:${ip}`, 20, 60_000)) {
+  if (!(await rateLimit(`intake-complete:${ip}`, 20, 60_000))) {
     return Response.json({ error: "Too many attempts" }, { status: 429 });
   }
 

@@ -61,8 +61,13 @@ test("fresh patient completes onboarding, books, cancels; provider sees the visi
   expect([200, 403]).toContain(res.status());
   await providerContext.close();
 
-  // Patient cancels.
+  // Patient cancels. Inside the 24h window this opens a confirm sheet first
+  // (late-cancellation fee warning) rather than cancelling immediately.
   await page.getByRole("button", { name: "Cancel" }).first().click();
+  const confirmButton = page.getByRole("button", { name: "Cancel visit" });
+  if (await confirmButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await confirmButton.click();
+  }
   await expect(page.getByText("No upcoming visits")).toBeVisible({ timeout: 15_000 });
 });
 

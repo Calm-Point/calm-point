@@ -16,7 +16,7 @@ const schema = z.object({
 export async function POST(req: Request) {
   try {
     const user = await requireRole("PATIENT");
-    if (!rateLimit(`elig:${user.id}`, 6, 60_000)) {
+    if (!(await rateLimit(`elig:${user.id}`, 6, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
     const parsed = schema.safeParse(await req.json().catch(() => null));

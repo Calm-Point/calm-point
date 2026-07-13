@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export async function POST() {
   try {
     const user = await requireRole("PATIENT");
-    if (!rateLimit(`analyze:${user.id}`, 5, 60_000)) {
+    if (!(await rateLimit(`analyze:${user.id}`, 5, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
     const flag = await prisma.featureFlag.findUnique({ where: { key: "intake_ai_analysis" } });

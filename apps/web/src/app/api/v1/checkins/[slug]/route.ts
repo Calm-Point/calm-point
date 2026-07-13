@@ -61,7 +61,7 @@ export async function POST(
 ) {
   try {
     const user = await requireRole("PATIENT");
-    if (!rateLimit(`checkin:${user.id}`, 10, 3_600_000)) {
+    if (!(await rateLimit(`checkin:${user.id}`, 10, 3_600_000))) {
       return Response.json({ error: "Too many submissions" }, { status: 429 });
     }
     const { slug } = await params;

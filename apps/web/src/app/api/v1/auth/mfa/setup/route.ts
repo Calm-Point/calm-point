@@ -29,7 +29,7 @@ const verifySchema = z.object({ code: z.string().length(6) });
 export async function PUT(req: Request) {
   try {
     const user = await requireUser();
-    if (!rateLimit(`mfa-verify:${user.id}`, 10, 60_000)) {
+    if (!(await rateLimit(`mfa-verify:${user.id}`, 10, 60_000))) {
       return Response.json({ error: "Too many attempts" }, { status: 429 });
     }
     const parsed = verifySchema.safeParse(await req.json().catch(() => null));

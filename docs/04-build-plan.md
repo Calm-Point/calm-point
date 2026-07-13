@@ -34,7 +34,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [x] `authorize.ts`: `requireRole`, `requireOwnership`, CareRelationship-scoped provider access
 - [x] TOTP MFA — enforced for PROVIDER and ADMIN before portal access
 - [x] Audit helper writing `AuditEvent` for auth events (login, failed login, MFA, password reset)
-- [x] Rate limiting on all auth endpoints (in-memory; Redis upgrade tracked for Phase 6)
+- [x] Rate limiting on all auth endpoints — Redis-backed (fixed window) when `REDIS_URL` is set, falling back to the original single-instance in-memory sliding window otherwise or on any Redis error
 - [ ] Account lockout after repeated failures + admin unlock
 
 ### 1.3 Design system (`packages/ui`)
@@ -174,6 +174,8 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 ## Phase 6 — Hardening & launch (~2 weeks)
 
 - [x] App-layer security pass: authz audit (every PHI route enforces role + CareRelationship ownership; only the anonymous rate-limited screener-start is public), append-only audit log, argon2id, MFA, security headers, gated-flag sign-off. External `/security-review` + dependency/secret scan still to run in CI.
+- [x] S3 object storage implemented (`@aws-sdk/client-s3` behind the existing `putText`/`putBinary`/`getText`/`appendText` seam — callers unchanged): SSE-KMS when `S3_KMS_KEY_ID` is set, else SSE-S3; local blob storage remains the dev/CI path and is still refused in production without `ALLOW_LOCAL_STORAGE=1`. 🚦 Needs a real bucket + IAM role/KMS key provisioned — untestable without AWS credentials, so this is code-complete but not live-verified against real S3.
+- [x] MFA-secret (and reused insurance member/group ID) encryption key: KMS migration path documented in docs/09-deployment.md §Key management — the derive-from-`AUTH_SECRET` scheme is a stopgap 🚦 rotate to a real KMS-managed key before production PHI
 - [ ] Penetration test (external vendor) 🚦 findings triaged before public launch
 - [ ] HIPAA Security Rule risk assessment documented (required §164.308); policies: incident response, breach notification, access review, backup/restore drill executed
 - [ ] Performance: k6 load tests (booking contention, messaging fan-out, webhook bursts); DB indexes verified against slow-query log

@@ -17,7 +17,7 @@ const answerSchema = z.object({
  */
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (!rateLimit(`intake-answer:${ip}`, 120, 60_000)) {
+  if (!(await rateLimit(`intake-answer:${ip}`, 120, 60_000))) {
     return Response.json({ error: "Too many attempts" }, { status: 429 });
   }
 
