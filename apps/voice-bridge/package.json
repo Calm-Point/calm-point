@@ -1,0 +1,23 @@
+{
+  "name": "@calm-point/voice-bridge",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Twilio Media Streams ↔ xAI Grok realtime voice bridge for the billing/support agent (docs/10 spec §4.1). Standalone Node service — deploy to Cloud Run/Fly, not Vercel serverless.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  }
+}

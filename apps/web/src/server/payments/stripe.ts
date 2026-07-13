@@ -222,13 +222,48 @@ export async function reconcileWebhookEvent(event: Stripe.Event): Promise<void> 
       const periodEnd = new Date(
         (sub as unknown as { current_period_end: number }).current_period_end * 1000,
       );
+      // The subscription id lives in exactly one of the two tables (patient
+      // membership vs provider SaaS); updateMany is a no-op on the other.
       await prisma.subscription.updateMany({
+        where: { stripeSubscriptionId: sub.id },
+        data: { status, currentPeriodEnd: periodEnd },
+      });
+      await prisma.providerSubscription.updateMany({
         where: { stripeSubscriptionId: sub.id },
         data: { status, currentPeriodEnd: periodEnd },
       });
       break;
     }
+    case "invoice.payment_failed": {
+      // Spec §2.1: portal access freezes when SaaS invoice settlement fails.
+      const invoice = event.data.object as Stripe.Invoice;
+      const subId =
+        typeof (invoice as unknown as { subscription?: unknown }).subscription === "string"
+          ? ((invoice as unknown as { subscription: string }).subscription)
+          : null;
+      if (subId) {
+        await prisma.providerSubscription.updateMany({
+          where: { stripeSubscriptionId: subId },
+          data: { status: "PAST_DUE" },
+        });
+      }
+      break;
+    }
     default:
       break;
+  }
+}
+
+/**
+ * Webhook idempotency cache (spec §6.2). Returns false when the event id was
+ * already processed — the caller must acknowledge without side effects. Uses
+ * a unique insert so concurrent retries race safely.
+ */
+export async function markEventProcessed(eventId: string, source = "stripe"): Promise<boolean> {
+  try {
+    await prisma.processedWebhookEvent.create({ data: { id: eventId, source } });
+    return true;
+  } catch {
+    return false; // unique violation → already processed
   }
 }

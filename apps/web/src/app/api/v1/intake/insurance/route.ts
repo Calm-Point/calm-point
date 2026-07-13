@@ -3,6 +3,7 @@ import { prisma, audit } from "@calm-point/db";
 import { requireRole, authzErrorResponse } from "@/server/authorize";
 import { rateLimit } from "@/server/rate-limit";
 import { decodeImageDataUrl, putBinary } from "@/server/storage";
+import { encryptSecret } from "@/server/auth/mfa";
 
 export const runtime = "nodejs";
 
@@ -55,8 +56,10 @@ export async function POST(req: Request) {
         patientId: profile.id,
         selfPay: Boolean(data.selfPay),
         payerName: data.payerName ?? "Self-pay",
-        memberId: data.memberId ?? "",
-        groupNumber: data.groupNumber ?? null,
+        // Member identifiers are AES-256-GCM encrypted at rest (spec §5.2);
+        // they're display-only, never queried, so ciphertext storage is safe.
+        memberId: data.memberId ? encryptSecret(data.memberId) : "",
+        groupNumber: data.groupNumber ? encryptSecret(data.groupNumber) : null,
         frontImageKey: frontKey ?? null,
         backImageKey: backKey ?? null,
       },

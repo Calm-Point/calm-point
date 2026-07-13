@@ -1,7 +1,8 @@
 import { prisma, audit } from "@calm-point/db";
 import { requireRole, authzErrorResponse } from "@/server/authorize";
 import { rateLimit } from "@/server/rate-limit";
-import { createVisitPaymentIntent, stripeConfigured } from "@/server/payments/stripe";
+import { isFollowUpVisit, stripeConfigured, VISIT_FEE_CENTS } from "@/server/payments/stripe";
+import { createSplitVisitPaymentIntent } from "@/server/payments/connect";
 
 export const runtime = "nodejs";
 
@@ -33,9 +34,21 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unknown appointment" }, { status: 404 });
     }
 
-    const { clientSecret, amountCents } = await createVisitPaymentIntent({
+    const existing = await prisma.payment.findUnique({ where: { appointmentId } });
+    if (existing?.status === "SUCCEEDED") {
+      return Response.json({ error: "This visit is already paid" }, { status: 409 });
+    }
+    const baseCents = (await isFollowUpVisit(profile.id))
+      ? VISIT_FEE_CENTS.followUp
+      : VISIT_FEE_CENTS.first;
+    // Split-fee engine: destination charge to the provider's Connect account
+    // when onboarded (10% platform fee + $10 platform-lead premium), else a
+    // plain platform charge. (docs/10 spec §2)
+    const { clientSecret, amountCents } = await createSplitVisitPaymentIntent({
       appointmentId,
       patientId: profile.id,
+      providerId: appt.providerId,
+      baseCents,
       email: profile.user.email ?? undefined,
     });
 

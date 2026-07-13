@@ -3,6 +3,10 @@
     {
       "path": "/api/v1/cron/reminders",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/v1/cron/retention",
+      "schedule": "30 8 * * *"
     }
   ]
 }

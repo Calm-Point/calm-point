@@ -1,4 +1,9 @@
-import { constructWebhookEvent, reconcileWebhookEvent, stripeConfigured } from "@/server/payments/stripe";
+import {
+  constructWebhookEvent,
+  markEventProcessed,
+  reconcileWebhookEvent,
+  stripeConfigured,
+} from "@/server/payments/stripe";
 
 export const runtime = "nodejs";
 
@@ -23,6 +28,11 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Invalid payload";
     return Response.json({ error: `Webhook signature verification failed: ${message}` }, { status: 400 });
+  }
+
+  // Idempotency cache (spec §6.2): replayed events are acknowledged, not re-run.
+  if (!(await markEventProcessed(event.id))) {
+    return Response.json({ received: true, duplicate: true });
   }
 
   try {

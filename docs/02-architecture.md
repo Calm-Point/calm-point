@@ -80,6 +80,19 @@ The screener runs before account creation (funnel-critical). Responses persist u
 ### D8 — AI calls are server-side only, logged, and behind one gateway module
 `packages/shared` defines the AI task types; `apps/web/src/server/ai/` implements a single gateway that: applies zero-retention headers, strips identifiers where feasible, records an `AiInteraction` row (model, purpose, token counts, safety flags — not raw PHI beyond what's needed), and enforces per-user rate limits. No component calls a model API directly.
 
+### D9 — Owner's e-prescribing/marketplace spec adopted on the existing stack (2026-07-12)
+The owner's "Automated Telehealth & E-Prescribing Platform" architecture spec proposed
+Firebase/Firestore/Cloud Functions. **Decision: adopt the spec's features on the existing
+Next.js + Prisma + Postgres stack, not Firebase.** Rationale: (a) the platform is already
+built and tested on this stack — a rebuild buys zero capability; (b) the domain is join-heavy
+and relational (appointments↔payments↔notes↔audit), Postgres's strength; (c) the spec's
+compliance requirements (immutable audit, AES-256 at rest, state-filtered matching) were
+already implemented here; (d) each spec Cloud Function maps 1:1 to a route handler, cron
+route, or standalone service (`apps/voice-bridge` for the WebSocket voice bridge, which
+cannot run on serverless). Firebase Realtime DB may be revisited for live session state if a
+concrete need appears. New vendor seams from the spec (DoseSpot/DrFirst, Change
+Healthcare/Availity, xAI Grok voice+STT, Stripe Connect) all follow D5 vendor abstractions.
+
 ## Environments
 
 | Env | Purpose | Data |
