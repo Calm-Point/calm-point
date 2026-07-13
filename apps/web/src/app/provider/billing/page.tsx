@@ -2,14 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
 import { ProviderBillingClient } from "@/components/provider-billing-client";
-
-const NAV = [
-  { href: "/provider", label: "Today" },
-  { href: "/provider/intakes", label: "Intakes" },
-  { href: "/provider/inbox", label: "Inbox" },
-  { href: "/provider/notes", label: "Notes" },
-  { href: "/provider/billing", label: "Billing" },
-];
+import { PROVIDER_NAV } from "../provider-nav";
 
 export default async function ProviderBillingPage() {
   const session = await auth();
@@ -19,7 +12,7 @@ export default async function ProviderBillingPage() {
       title="Billing & payouts"
       userName={session.user.name ?? ""}
       roleLabel="Provider"
-      nav={NAV}
+      nav={PROVIDER_NAV}
     >
       <ProviderBillingClient />
     </PortalShell>

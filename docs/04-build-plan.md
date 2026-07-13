@@ -121,9 +121,9 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 - [x] Appointments (upcoming, join, cancel) + Care page (signed after-visit plan summaries); reschedule UI, check-in cadence charts, billing, settings still open
 
 ### 3.6 Provider portal
-- [ ] Today view (queue + one-click join), calendar + availability manager
-- [ ] Patient chart: intake summary, score trends, notes history, meds list, messages
-- [ ] Notes queue (unsigned drafts), inbox, panel list with safety-flag alerts
+- [x] Today view (queue + one-click join + real unsigned-notes/inbox-unread counts), recurring weekly availability manager (`/provider/availability` — per-day hours + slot size, replaces the template atomically) — live-verified incl. persistence across reload
+- [x] Patient chart (`/provider/patients/[patientId]`, CareRelationship-scoped via `requirePatientAccess`): score trends, visit history, signed-notes summary, medications, message-thread entry point — live-verified with real seeded data; reachable from Today and the intake inbox
+- [x] Notes queue (unsigned drafts), inbox, panel list with safety-flag alerts
 
 ### 3.7 Admin portal
 - [x] User management (search, suspend/reactivate, reset MFA) — all audited

@@ -3,14 +3,8 @@ import { prisma, audit } from "@calm-point/db";
 import { Badge, Card, CardTitle, CardDescription, EmptyState } from "@calm-point/ui";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
-
-const NAV = [
-  { href: "/provider", label: "Today" },
-  { href: "/provider/intakes", label: "Intakes" },
-  { href: "/provider/inbox", label: "Inbox" },
-  { href: "/provider/notes", label: "Notes" },
-  { href: "/provider/billing", label: "Billing" },
-];
+import { listThreads } from "@/server/messaging";
+import { PROVIDER_NAV } from "./provider-nav";
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
@@ -24,18 +18,25 @@ export default async function ProviderDashboard() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const upcoming = await prisma.appointment.findMany({
-    where: {
-      provider: { userId: session.user.id },
-      status: { in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"] },
-      endsAt: { gt: new Date() },
-    },
-    orderBy: { startsAt: "asc" },
-    take: 20,
-    include: {
-      patient: { include: { user: { select: { firstName: true, lastName: true } } } },
-    },
-  });
+  const [upcoming, unsignedCount, threads] = await Promise.all([
+    prisma.appointment.findMany({
+      where: {
+        provider: { userId: session.user.id },
+        status: { in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"] },
+        endsAt: { gt: new Date() },
+      },
+      orderBy: { startsAt: "asc" },
+      take: 20,
+      include: {
+        patient: { include: { user: { select: { firstName: true, lastName: true } } } },
+      },
+    }),
+    prisma.clinicalNote.count({
+      where: { provider: { userId: session.user.id }, status: { in: ["AI_DRAFT", "IN_REVIEW"] } },
+    }),
+    listThreads(session.user),
+  ]);
+  const unreadCount = threads.filter((t) => t.unread).length;
   await audit({
     actorId: session.user.id,
     action: "appointment.list",
@@ -48,7 +49,7 @@ export default async function ProviderDashboard() {
       title="Today"
       userName={session.user.name ?? ""}
       roleLabel="Provider"
-      nav={NAV}
+      nav={PROVIDER_NAV}
     >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
@@ -76,6 +77,12 @@ export default async function ProviderDashboard() {
                       {a.status.replace("_", " ").toLowerCase()}
                     </Badge>
                     <a
+                      href={`/provider/patients/${a.patientId}`}
+                      className="rounded-full px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-ink/5"
+                    >
+                      Chart
+                    </a>
+                    <a
                       href={`/provider/visit/${a.id}`}
                       className="rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white"
                     >
@@ -88,16 +95,32 @@ export default async function ProviderDashboard() {
           )}
         </div>
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardTitle className="mb-1 text-lg">Unsigned notes</CardTitle>
-            <CardDescription>
-              AI-drafted notes awaiting review land here (Phase 3.3).
-            </CardDescription>
-          </Card>
-          <Card>
-            <CardTitle className="mb-1 text-lg">Inbox</CardTitle>
-            <CardDescription>Patient messages ordered by response SLA (Phase 3.4).</CardDescription>
-          </Card>
+          <a href="/provider/notes">
+            <Card className="transition-all hover:-translate-y-0.5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Unsigned notes</CardTitle>
+                {unsignedCount > 0 ? <Badge tone="warn">{unsignedCount}</Badge> : null}
+              </div>
+              <CardDescription>
+                {unsignedCount === 0
+                  ? "You're all caught up — nothing awaiting review."
+                  : `${unsignedCount} AI draft${unsignedCount === 1 ? "" : "s"} awaiting your review.`}
+              </CardDescription>
+            </Card>
+          </a>
+          <a href="/provider/inbox">
+            <Card className="transition-all hover:-translate-y-0.5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Inbox</CardTitle>
+                {unreadCount > 0 ? <Badge tone="brand">{unreadCount}</Badge> : null}
+              </div>
+              <CardDescription>
+                {unreadCount === 0
+                  ? "No unread patient messages."
+                  : `${unreadCount} conversation${unreadCount === 1 ? "" : "s"} with unread messages.`}
+              </CardDescription>
+            </Card>
+          </a>
         </div>
       </div>
     </PortalShell>

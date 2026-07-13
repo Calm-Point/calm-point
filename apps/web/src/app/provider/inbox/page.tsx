@@ -2,14 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
 import { MessagesClient } from "@/components/messages-client";
-
-const NAV = [
-  { href: "/provider", label: "Today" },
-  { href: "/provider/intakes", label: "Intakes" },
-  { href: "/provider/inbox", label: "Inbox" },
-  { href: "/provider/notes", label: "Notes" },
-  { href: "/provider/billing", label: "Billing" },
-];
+import { PROVIDER_NAV } from "../provider-nav";
 
 export default async function ProviderInboxPage() {
   const session = await auth();
@@ -19,7 +12,7 @@ export default async function ProviderInboxPage() {
       title="Inbox"
       userName={session.user.name ?? ""}
       roleLabel="Provider"
-      nav={NAV}
+      nav={PROVIDER_NAV}
     >
       <MessagesClient />
     </PortalShell>

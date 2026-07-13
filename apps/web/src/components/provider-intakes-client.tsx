@@ -102,7 +102,15 @@ export function ProviderIntakesClient() {
 
       {selected ? (
         <Card className="space-y-4">
-          <h2 className="font-semibold">Reviewing · {selected.patientName}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">Reviewing · {selected.patientName}</h2>
+            <a
+              href={`/provider/patients/${selected.patientId}`}
+              className="rounded-full bg-brand-tint px-3 py-1 text-sm font-medium text-brand"
+            >
+              Open chart
+            </a>
+          </div>
           {detail ? (
             <>
               {(detail.riskFlags ?? []).map((flag) => (

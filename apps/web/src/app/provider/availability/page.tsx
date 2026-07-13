@@ -1,20 +1,20 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
-import { ProviderIntakesClient } from "@/components/provider-intakes-client";
+import { ProviderAvailabilityClient } from "@/components/provider-availability-client";
 import { PROVIDER_NAV } from "../provider-nav";
 
-export default async function ProviderIntakesPage() {
+export default async function ProviderAvailabilityPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   return (
     <PortalShell
-      title="Intake analyses"
+      title="Availability"
       userName={session.user.name ?? ""}
       roleLabel="Provider"
       nav={PROVIDER_NAV}
     >
-      <ProviderIntakesClient />
+      <ProviderAvailabilityClient />
     </PortalShell>
   );
 }
