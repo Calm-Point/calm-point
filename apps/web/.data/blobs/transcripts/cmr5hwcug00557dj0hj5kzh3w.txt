@@ -1,2 +1,0 @@
-patient: I've been feeling anxious mostly in the mornings.
-provider: Let's start a daily grounding practice and follow up in two weeks.
