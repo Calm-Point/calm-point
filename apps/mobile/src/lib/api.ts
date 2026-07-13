@@ -51,23 +51,30 @@ export async function completeSignIn(email: string, password: string, totpCode?:
     password,
     ...(totpCode ? { totpCode } : {}),
   });
-  const res = await fetch(`${BASE}/api/auth/callback/credentials?json=true`, {
+  // `redirect: "manual"` avoids following Auth.js's post-login redirect: that
+  // hop needs its own CORS headers when the app runs cross-origin (e.g. the
+  // Expo web preview), which the redirect target doesn't carry, and the
+  // browser aborts the whole fetch as a network failure otherwise. We don't
+  // need the redirect's destination — success is verified by checking the
+  // session afterward, the real source of truth on every platform.
+  await fetch(`${BASE}/api/auth/callback/credentials?json=true`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
     credentials: "include",
-  });
-  // Auth.js returns 200 with the session cookie on success; a redirect URL
-  // containing "error" signals bad credentials.
-  const text = await res.text();
-  if (!res.ok || /error/i.test(text)) {
+    redirect: "manual",
+  }).catch(() => {});
+  const session = await getSession();
+  if (!session.user) {
     throw new ApiError("Sign-in failed. Check your details and try again.", 401);
   }
 }
 
 export async function getSession(): Promise<{ user?: { name?: string; role?: string } }> {
   const res = await fetch(`${BASE}/api/auth/session`, { credentials: "include" });
-  return res.json().catch(() => ({}));
+  // Auth.js returns the JSON literal `null` (not `{}`) for an anonymous session.
+  const data = await res.json().catch(() => null);
+  return data ?? {};
 }
 
 export async function signOut() {
@@ -122,3 +129,96 @@ export const companionTurn = (sessionId: string, text: string) =>
     method: "POST",
     body: JSON.stringify({ text }),
   });
+
+// ── Intake battery (docs/10 §1.2) ────────────────────────────────────────────
+
+export interface CheckinQuestion {
+  id: string;
+  prompt: string;
+  helpText: string | null;
+  options: Array<{ id: string; label: string }>;
+}
+export interface CheckinQuestionnaire {
+  slug: string;
+  version: number;
+  title: string;
+  questions: CheckinQuestion[];
+}
+export const loadCheckin = (slug: string) =>
+  request<{ questionnaire: CheckinQuestionnaire }>(`/api/v1/checkins/${slug}`);
+export const submitCheckin = (slug: string, answers: Array<{ questionId: string; optionId: string }>) =>
+  request<{ ok: boolean; crisis: boolean }>(`/api/v1/checkins/${slug}`, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
+  });
+export const requestIntakeAnalysis = () =>
+  request<{ ok: boolean }>("/api/v1/intake/analyze", { method: "POST" }).catch(() => ({ ok: false }));
+
+// ── Identity / insurance / consent (docs/10 §1.4) ────────────────────────────
+
+export const uploadIdentity = (kind: "drivers_license" | "state_id" | "passport", image: string) =>
+  request<{ ok: boolean }>("/api/v1/intake/identity", {
+    method: "POST",
+    body: JSON.stringify({ kind, image }),
+  });
+
+export const submitInsurance = (payload: {
+  selfPay?: boolean;
+  payerName?: string;
+  memberId?: string;
+  groupNumber?: string;
+  frontImage?: string;
+  backImage?: string;
+}) => request<{ ok: boolean }>("/api/v1/intake/insurance", { method: "POST", body: JSON.stringify(payload) });
+
+export const checkEligibility = (payerName: string, memberId: string) =>
+  request<{ status: string; copayCents: number | null }>("/api/v1/intake/eligibility", {
+    method: "POST",
+    body: JSON.stringify({ payerName, memberId }),
+  });
+
+const CONSENT_VERSION = "2026-07";
+export const recordConsents = () =>
+  request<{ ok: boolean }>("/api/v1/intake/consent", {
+    method: "POST",
+    body: JSON.stringify({
+      consents: [
+        { docKey: "telehealth-consent", docVersion: CONSENT_VERSION },
+        { docKey: "hipaa-npp", docVersion: CONSENT_VERSION },
+        { docKey: "terms", docVersion: CONSENT_VERSION },
+      ],
+    }),
+  });
+
+// ── Booking + membership (docs/10 §1.5–1.6) ──────────────────────────────────
+
+export interface Provider {
+  id: string;
+  name: string;
+  credentials: string;
+  specialties: string[];
+  bio: string | null;
+}
+export const listProviders = () => request<{ providers: Provider[] }>("/api/v1/booking/providers");
+
+export interface Slot {
+  startsAt: string;
+  endsAt: string;
+}
+export const listSlots = (providerId: string, days = 10) =>
+  request<{ slots: Slot[] }>(`/api/v1/booking/slots?providerId=${providerId}&days=${days}`);
+
+export const bookAppointment = (providerId: string, startsAt: string, kind: "INITIAL" | "FOLLOW_UP") =>
+  request<{ ok: boolean; appointmentId: string }>("/api/v1/booking/appointments", {
+    method: "POST",
+    body: JSON.stringify({ providerId, startsAt, kind }),
+  });
+
+export const createVisitPaymentIntent = (appointmentId: string) =>
+  request<{ clientSecret: string; amountCents: number }>("/api/v1/payments/visit-intent", {
+    method: "POST",
+    body: JSON.stringify({ appointmentId }),
+  });
+
+export const startMembership = () =>
+  request<{ clientSecret: string }>("/api/v1/payments/membership", { method: "POST" });

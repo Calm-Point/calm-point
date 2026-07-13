@@ -2,7 +2,48 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import { getSession, signOut } from "@/lib/api";
+import { GlassCard } from "@/components/GlassCard";
+import { Icon, type IconName } from "@/lib/icons";
 import { radius, spacing, useTheme } from "@/lib/theme";
+
+function NavCard({
+  icon,
+  title,
+  subtitle,
+  onPress,
+  delay,
+}: {
+  icon: IconName;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+  delay: number;
+}) {
+  const t = useTheme();
+  return (
+    <GlassCard delay={delay}>
+      <Pressable onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: spacing(3) }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: radius.md,
+            backgroundColor: t.brandTint,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={icon} size={20} color={t.brand} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>{title}</Text>
+          <Text style={{ color: t.inkSoft }}>{subtitle}</Text>
+        </View>
+        <Icon name="chev" size={18} color={t.inkSoft} />
+      </Pressable>
+    </GlassCard>
+  );
+}
 
 export default function Home() {
   const t = useTheme();
@@ -15,15 +56,6 @@ export default function Home() {
     });
   }, []);
 
-  const card = {
-    backgroundColor: t.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: t.hairline,
-    padding: spacing(5),
-    gap: spacing(1),
-  } as const;
-
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: t.bg }}
@@ -33,18 +65,41 @@ export default function Home() {
         Good to see you{name ? `, ${name}` : ""}
       </Text>
 
-      <Pressable style={card} onPress={() => router.push("/(tabs)/appointments")}>
-        <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>Next appointment</Text>
-        <Text style={{ color: t.inkSoft }}>Book or manage your visits →</Text>
-      </Pressable>
-      <Pressable style={card} onPress={() => router.push("/(tabs)/messages")}>
-        <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>Messages</Text>
-        <Text style={{ color: t.inkSoft }}>Your care team is one message away →</Text>
-      </Pressable>
-      <Pressable style={card} onPress={() => router.push("/(tabs)/companion")}>
-        <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>Companion</Text>
-        <Text style={{ color: t.inkSoft }}>A space to think out loud →</Text>
-      </Pressable>
+      <NavCard
+        icon="spark"
+        title="Your intake"
+        subtitle="Complete your health questionnaire →"
+        onPress={() => router.push("/(tabs)/intake")}
+        delay={0}
+      />
+      <NavCard
+        icon="calendar"
+        title="Next appointment"
+        subtitle="Book or manage your visits →"
+        onPress={() => router.push("/(tabs)/appointments")}
+        delay={60}
+      />
+      <NavCard
+        icon="message"
+        title="Messages"
+        subtitle="Your care team is one message away →"
+        onPress={() => router.push("/(tabs)/messages")}
+        delay={120}
+      />
+      <NavCard
+        icon="care"
+        title="My care"
+        subtitle="Verify identity, coverage, and membership →"
+        onPress={() => router.push("/(tabs)/care")}
+        delay={180}
+      />
+      <NavCard
+        icon="spark"
+        title="Companion"
+        subtitle="A space to think out loud →"
+        onPress={() => router.push("/(tabs)/companion")}
+        delay={240}
+      />
 
       <Pressable
         onPress={async () => {
