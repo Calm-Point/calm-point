@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
-import { MessagesClient } from "@/components/messages-client";
+import { ProviderBillingClient } from "@/components/provider-billing-client";
 
 const NAV = [
   { href: "/provider", label: "Today" },
@@ -11,17 +11,17 @@ const NAV = [
   { href: "/provider/billing", label: "Billing" },
 ];
 
-export default async function ProviderInboxPage() {
+export default async function ProviderBillingPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   return (
     <PortalShell
-      title="Inbox"
+      title="Billing & payouts"
       userName={session.user.name ?? ""}
       roleLabel="Provider"
       nav={NAV}
     >
-      <MessagesClient />
+      <ProviderBillingClient />
     </PortalShell>
   );
 }

@@ -16,6 +16,7 @@
     "@calm-point/shared": "workspace:*",
     "@calm-point/ui": "workspace:^",
     "@node-rs/argon2": "^2.0.2",
+    "@stripe/stripe-js": "^9.9.0",
     "next": "^15.1.4",
     "next-auth": "5.0.0-beta.31",
     "otplib": "^13.4.1",

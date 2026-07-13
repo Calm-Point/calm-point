@@ -5,10 +5,10 @@ import { NotesClient } from "./notes-client";
 
 const NAV = [
   { href: "/provider", label: "Today" },
-  { href: "/provider/calendar", label: "Calendar" },
-  { href: "/provider/patients", label: "Patients" },
+  { href: "/provider/intakes", label: "Intakes" },
   { href: "/provider/inbox", label: "Inbox" },
   { href: "/provider/notes", label: "Notes" },
+  { href: "/provider/billing", label: "Billing" },
 ];
 
 export default async function ProviderNotesPage() {

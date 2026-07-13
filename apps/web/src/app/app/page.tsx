@@ -41,6 +41,18 @@ export default async function PatientDashboard() {
       ) : null}
       <div className="grid gap-6 sm:grid-cols-2">
         <Card>
+          <CardTitle className="mb-1 text-lg">Your intake</CardTitle>
+          <CardDescription>
+            <a href="/app/intake" className="text-brand underline">
+              Complete your health questionnaire →
+            </a>{" "}
+            then{" "}
+            <a href="/app/verify" className="text-brand underline">
+              verify identity &amp; coverage →
+            </a>
+          </CardDescription>
+        </Card>
+        <Card>
           <CardTitle className="mb-1 text-lg">Next appointment</CardTitle>
           <CardDescription>
             <a href="/app/appointments" className="text-brand underline">

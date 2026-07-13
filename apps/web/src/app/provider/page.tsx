@@ -6,10 +6,10 @@ import { PortalShell } from "@/components/portal-shell";
 
 const NAV = [
   { href: "/provider", label: "Today" },
-  { href: "/provider/calendar", label: "Calendar" },
-  { href: "/provider/patients", label: "Patients" },
+  { href: "/provider/intakes", label: "Intakes" },
   { href: "/provider/inbox", label: "Inbox" },
   { href: "/provider/notes", label: "Notes" },
+  { href: "/provider/billing", label: "Billing" },
 ];
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
