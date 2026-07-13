@@ -13,6 +13,9 @@ dist/
 .env.*
 !.env.example
 
+# local dev blob storage (transcripts, uploads) — runtime data, never committed
+.data/
+
 # misc
 .DS_Store
 *.log
