@@ -125,6 +125,7 @@ export async function GET() {
         status: a.status,
         startsAt: a.startsAt.toISOString(),
         endsAt: a.endsAt.toISOString(),
+        providerId: a.providerId,
         providerName: `${a.provider.user.firstName} ${a.provider.user.lastName}`,
         // Patient names are only exposed to the provider side of the relationship.
         patientName:

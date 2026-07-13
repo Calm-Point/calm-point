@@ -55,6 +55,16 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: AI scribe faithfulness eval
+        # Needs a real ANTHROPIC_API_KEY to give a real signal — the script
+        # itself detects a missing key and skips (exit 0) rather than
+        # reporting a false pass off mock model output. Any change to the
+        # scribe prompt/parsing (CLAUDE.md "AI safety is non-negotiable")
+        # must keep this green when the secret is configured.
+        run: pnpm --filter @calm-point/web evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
       - name: Build
         run: pnpm build
 

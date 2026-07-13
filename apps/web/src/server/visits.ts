@@ -132,6 +132,42 @@ Rules (non-negotiable):
 - The provider is the author of record; you produce a DRAFT for their review.
 Return strict JSON: {"subjective": "...", "objective": "...", "assessment": "...", "plan": "..."}`;
 
+export interface SoapSections {
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  mock: boolean;
+}
+
+/**
+ * Drafts a SOAP note from a diarized visit transcript. Pulled out of
+ * completeVisit() so the scribe faithfulness eval harness
+ * (apps/web/evals/scribe-faithfulness.ts) exercises the exact same prompt
+ * and parsing the product uses, not a re-implementation of it.
+ */
+export async function draftSoapNote(transcript: string, userId?: string): Promise<SoapSections> {
+  const result = await runAiTask({
+    purpose: "scribe-soap",
+    system: SOAP_SYSTEM,
+    prompt: `Visit transcript (diarized):\n\n${transcript}`,
+    userId,
+    maxTokens: 3000,
+  });
+  try {
+    const parsed = JSON.parse(result.text.replace(/^```json?\n?|```$/g, "")) as Partial<SoapSections>;
+    return {
+      subjective: parsed.subjective ?? "",
+      objective: parsed.objective ?? "",
+      assessment: parsed.assessment ?? "",
+      plan: parsed.plan ?? "",
+      mock: result.mock,
+    };
+  } catch {
+    return { subjective: result.text, objective: "", assessment: "", plan: "", mock: result.mock };
+  }
+}
+
 /** Completes the visit and generates the AI SOAP draft (if consented + transcribed). */
 export async function completeVisit(user: SessionUser, appointmentId: string) {
   const { appointment, isProvider } = await loadVisitForUser(user, appointmentId);
@@ -154,20 +190,7 @@ export async function completeVisit(user: SessionUser, appointmentId: string) {
   if (!appointment.transcript || appointment.note) return { noteDrafted: false };
 
   const transcript = await getText(appointment.transcript.storageKey);
-  const result = await runAiTask({
-    purpose: "scribe-soap",
-    system: SOAP_SYSTEM,
-    prompt: `Visit transcript (diarized):\n\n${transcript}`,
-    userId: user.id,
-    maxTokens: 3000,
-  });
-
-  let sections: { subjective?: string; objective?: string; assessment?: string; plan?: string } = {};
-  try {
-    sections = JSON.parse(result.text.replace(/^```json?\n?|```$/g, ""));
-  } catch {
-    sections = { subjective: result.text };
-  }
+  const sections = await draftSoapNote(transcript, user.id);
 
   const note = await prisma.clinicalNote.create({
     data: {
@@ -175,10 +198,10 @@ export async function completeVisit(user: SessionUser, appointmentId: string) {
       patientId: appointment.patientId,
       providerId: appointment.providerId,
       status: "AI_DRAFT",
-      subjective: sections.subjective ?? "",
-      objective: sections.objective ?? "",
-      assessment: sections.assessment ?? "",
-      plan: sections.plan ?? "",
+      subjective: sections.subjective,
+      objective: sections.objective,
+      assessment: sections.assessment,
+      plan: sections.plan,
     },
   });
   await audit({
@@ -186,7 +209,7 @@ export async function completeVisit(user: SessionUser, appointmentId: string) {
     action: "note.ai-draft",
     resourceType: "ClinicalNote",
     resourceId: note.id,
-    metadata: { mock: result.mock },
+    metadata: { mock: sections.mock },
   });
   return { noteDrafted: true, noteId: note.id };
 }

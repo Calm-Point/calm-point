@@ -15,7 +15,8 @@ export type AiPurpose =
   | "intake-summary"
   | "intake-analysis"
   | "safety-check"
-  | "therapist-text";
+  | "therapist-text"
+  | "eval-judge";
 
 const MODEL_BY_PURPOSE: Record<AiPurpose, string> = {
   "scribe-soap": "claude-sonnet-5",
@@ -23,6 +24,7 @@ const MODEL_BY_PURPOSE: Record<AiPurpose, string> = {
   "intake-analysis": "claude-sonnet-5",
   "safety-check": "claude-haiku-4-5-20251001",
   "therapist-text": "claude-sonnet-5",
+  "eval-judge": "claude-sonnet-5",
 };
 
 const GEMINI_MODEL = "gemini-2.5-flash";
@@ -208,6 +210,14 @@ function mockCompletion(purpose: AiPurpose, prompt: string): string {
       "The provider is the author of record and makes all diagnostic and treatment",
       "decisions. This draft contains no diagnosis and no medication recommendation.",
     ].join("\n");
+  }
+  if (purpose === "eval-judge") {
+    return JSON.stringify({
+      faithful: true,
+      score: 5,
+      issues: [],
+      rationale: "[MOCK JUDGE — no vendor AI configured; not a real verdict]",
+    });
   }
   return "[mock ai output]";
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardTitle, GlassPanel, Badge } from "@calm-point/ui";
+import { DevicePrecheck } from "@/components/device-precheck";
 
 interface JoinInfo {
   vendor: string;
@@ -90,20 +91,21 @@ export function VisitRoom({
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
       {!join ? (
-        <Card className="text-center">
-          <CardTitle className="mb-2">Ready for your visit?</CardTitle>
-          <p className="mb-6 text-sm text-ink-soft">
-            Check that your camera and microphone are working, find a quiet
-            private space, and join when you&apos;re ready.
+        <Card>
+          <CardTitle className="mb-2 text-center">Ready for your visit?</CardTitle>
+          <p className="mb-6 text-center text-sm text-ink-soft">
+            Find a quiet, private space. Check your camera and mic below, then join.
           </p>
           {error ? (
-            <p role="alert" className="mb-4 text-sm text-danger">
+            <p role="alert" className="mb-4 text-center text-sm text-danger">
               {error}
             </p>
           ) : null}
-          <Button size="lg" loading={busy} onClick={doJoin} className="w-full">
-            {isProvider ? "Start visit" : "Join visit"}
-          </Button>
+          <DevicePrecheck
+            onReady={doJoin}
+            joining={busy}
+            joinLabel={isProvider ? "Start visit" : "Join visit"}
+          />
         </Card>
       ) : (
         <>

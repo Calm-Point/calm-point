@@ -4,6 +4,7 @@ import { Badge, Card, CardTitle, CardDescription, EmptyState } from "@calm-point
 import { auth } from "@/auth";
 import { PortalShell } from "@/components/portal-shell";
 import { listThreads } from "@/server/messaging";
+import { MarkNoShowButton } from "@/components/mark-no-show-button";
 import { PROVIDER_NAV } from "./provider-nav";
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
@@ -18,15 +19,28 @@ export default async function ProviderDashboard() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const [upcoming, unsignedCount, threads] = await Promise.all([
+  const now = new Date();
+  const [upcoming, pastDue, unsignedCount, threads] = await Promise.all([
     prisma.appointment.findMany({
       where: {
         provider: { userId: session.user.id },
         status: { in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"] },
-        endsAt: { gt: new Date() },
+        endsAt: { gt: now },
       },
       orderBy: { startsAt: "asc" },
       take: 20,
+      include: {
+        patient: { include: { user: { select: { firstName: true, lastName: true } } } },
+      },
+    }),
+    prisma.appointment.findMany({
+      where: {
+        provider: { userId: session.user.id },
+        status: { in: ["SCHEDULED", "CONFIRMED"] },
+        startsAt: { lt: now },
+      },
+      orderBy: { startsAt: "desc" },
+      take: 10,
       include: {
         patient: { include: { user: { select: { firstName: true, lastName: true } } } },
       },
@@ -53,6 +67,26 @@ export default async function ProviderDashboard() {
     >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
+          {pastDue.length > 0 ? (
+            <div className="mb-6">
+              <h2 className="mb-4 text-lg font-semibold">Needs attention</h2>
+              <div className="flex flex-col gap-3">
+                {pastDue.map((a) => (
+                  <Card key={a.id} className="flex items-center justify-between border-warn/20 bg-warn/10 p-5">
+                    <div>
+                      <p className="font-medium">
+                        {a.patient.user.firstName} {a.patient.user.lastName}
+                      </p>
+                      <p className="text-sm text-ink-soft">
+                        {dateFmt.format(a.startsAt)} · scheduled but never started
+                      </p>
+                    </div>
+                    <MarkNoShowButton appointmentId={a.id} />
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <h2 className="mb-4 text-lg font-semibold">Upcoming visits</h2>
           {upcoming.length === 0 ? (
             <EmptyState

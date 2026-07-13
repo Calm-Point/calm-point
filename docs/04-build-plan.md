@@ -92,23 +92,23 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 ### 3.1 Scheduling
 - [x] Provider availability templates → timezone-correct slot generation, DST-tested (exceptions/time-off UI still open)
 - [x] Matching: state licensure (verified, unexpired) ∩ acceptingNew ∩ availability (condition-specialty filter still open)
-- [x] Patient booking flow (pick provider → pick slot), cancel with late-cancel window; advisory-lock double-booking protection (reschedule UI still open)
+- [x] Patient booking flow (pick provider → pick slot), cancel with late-cancel window (confirm sheet + toast warning when inside 24h), reschedule (in-place move via slot picker, collision + notice re-checked server-side); advisory-lock double-booking protection
 - [x] Creates `CareRelationship` on first booking
 - [x] Reminder engine: T-24h/T-1h tiers (unit-tested windows), deduped in-app notifications, cron endpoint + vercel.json schedule, ICS download (PHI-light, escaping tested); email/SMS delivery slots in when SES/Twilio keys + BAAs exist
-- [ ] No-show + late-cancel handling; provider-initiated cancel/rebook
+- [x] No-show + late-cancel handling: provider Today page surfaces past-due unattended visits with a "Mark no-show" action; provider-initiated cancel already supported by the existing cancel endpoint
 
 ### 3.2 Video visits
 - [x] `VideoProvider` interface; Zoom Video SDK JWT implementation + Daily.co implementation (flag-selected); dev vendor for local/CI — real-vendor keys + BAA still required 🚦
-- [ ] Pre-join device check (camera/mic/permissions), waiting room, in-visit UI (mute, camera, leave, connection quality indicator)
+- [x] Pre-join device check: live camera preview, mic level meter (Web Audio analyser), camera/mic device pickers — live-verified with Chromium's fake media devices; never hard-blocks joining on permission/hardware failure. Waiting room + in-visit mute/camera/connection-quality controls still open (blocked on a real vendor SDK)
 - [x] Visit lifecycle `SCHEDULED → IN_PROGRESS → COMPLETED` (join/complete endpoints; vendor webhooks still open)
 - [ ] 🚦 Zoom (or Daily) BAA signed before production visits
 
 ### 3.3 AI Scribe
 - [x] Consent step at visit start (recorded to `Appointment.scribeConsentAt`; transcript ingest hard-refuses without it)
 - [x] Transcript ingest pipeline → storage seam (`VisitTranscript`); Deepgram streaming + S3 land with vendor keys (local blob store for dev/CI)
-- [x] Claude SOAP-draft generation via AI gateway (purpose `scribe-soap`, faithfulness rules in system prompt, AiInteraction logging); deterministic mock in dev/CI
+- [x] Claude SOAP-draft generation via AI gateway (purpose `scribe-soap`, faithfulness rules in system prompt, AiInteraction logging); deterministic mock in dev/CI; drafting logic extracted to `draftSoapNote()` (`apps/web/src/server/visits.ts`) so the eval harness exercises the exact production path
 - [x] Provider note editor: section-by-section edit, sign (locks + sha256 hash, API refuses post-sign edits); diff view + amendments UI still open
-- [ ] Eval set: ≥ 20 synthetic visit transcripts → SOAP drafts rated for faithfulness (no hallucinated meds/symptoms — automated Claude-as-judge + human spot check) 🚦 clinical reviewer approves quality bar before scribe defaults on
+- [x] Eval set: 20 synthetic visit transcripts (`apps/web/evals/scribe-faithfulness/`) covering fabrication, dropped/inverted denials, ruled-out diagnoses, dosage fidelity, and safety-relevant omissions → Claude-as-judge scores each SOAP draft + a keyword guard as defense-in-depth; wired into CI (`pnpm --filter @calm-point/web evals`, gated on `secrets.ANTHROPIC_API_KEY` — skips cleanly without it rather than reporting a false pass off mock output). Mechanically verified end-to-end via mock model output (20/20). Human spot check + clinical reviewer sign-off before scribe defaults on 🚦 still required
 
 ### 3.4 Messaging
 - [x] Threads, send/receive, read receipts along active CareRelationships (attachments still open — needs S3)
