@@ -127,7 +127,7 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 
 ### 3.7 Admin portal
 - [x] User management (search, suspend/reactivate, reset MFA) — all audited
-- [ ] Provider onboarding: create provider, license records + expiry alerts, credential verification checklist, availability oversight
+- [x] Provider onboarding: create provider, license records, credential verification checklist (`/admin/providers` — invite form, temp password, license status badges, verify-licenses action) — live-verified end-to-end; expiry alerts + availability oversight still open
 - [x] Audit log search UI + feature-flag console with software-enforced sign-off gate on ai-therapist (dashboards still open)
 - [ ] Audited impersonation ("View as user") with visible banner + auto-expiry
 

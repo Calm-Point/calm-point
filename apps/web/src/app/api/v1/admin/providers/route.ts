@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma, audit } from "@calm-point/db";
 import { requireRole, authzErrorResponse } from "@/server/authorize";
@@ -114,6 +115,10 @@ export async function POST(req: Request) {
 
     return Response.json({ ok: true, providerId: provider.id }, { status: 201 });
   } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const target = Array.isArray(err.meta?.target) ? err.meta.target.join(", ") : "field";
+      return Response.json({ error: `A provider with that ${target} already exists` }, { status: 409 });
+    }
     return authzErrorResponse(err) ?? Response.json({ error: "Internal error" }, { status: 500 });
   }
 }
