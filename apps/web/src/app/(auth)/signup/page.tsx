@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button, Card, CardTitle, Field } from "@calm-point/ui";
+import { Wordmark } from "@/components/brand";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -69,7 +70,10 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-12">
+      <a href="/" aria-label="Calm Point home">
+        <Wordmark />
+      </a>
       <Card className="w-full max-w-md">
         <CardTitle className="mb-1">Create your account</CardTitle>
         <p className="mb-6 text-sm text-ink-soft">

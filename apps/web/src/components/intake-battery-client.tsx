@@ -161,7 +161,7 @@ export function IntakeBatteryClient() {
           Your care team has been alerted. Free, confidential help is available 24/7.
         </p>
         <div className="flex flex-col gap-2">
-          <a href="tel:988" className="rounded-xl bg-brand px-5 py-3 text-center font-semibold text-white">
+          <a href="tel:988" className="rounded-xl bg-brand px-5 py-3 text-center font-semibold text-on-brand">
             Call or text 988 — Suicide &amp; Crisis Lifeline
           </a>
           <a href="sms:741741" className="rounded-xl border border-brand px-5 py-3 text-center font-semibold text-brand">

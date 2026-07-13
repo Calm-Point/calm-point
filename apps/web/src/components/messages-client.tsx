@@ -189,7 +189,7 @@ export function MessagesClient() {
                     <div
                       className={cn(
                         "max-w-[75%] rounded-lg px-4 py-2.5",
-                        m.mine ? "bg-brand text-white" : "bg-ink/5 text-ink",
+                        m.mine ? "bg-brand text-on-brand" : "bg-ink/5 text-ink",
                       )}
                     >
                       <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>

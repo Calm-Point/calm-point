@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CONDITIONS } from "@calm-point/shared";
 import { Card } from "@calm-point/ui";
 import { CONDITION_CONTENT } from "../content";
+import { Wordmark } from "@/components/brand";
 
 export function generateStaticParams() {
   return CONDITION_CONTENT.map((c) => ({ condition: c.slug }));
@@ -37,16 +38,16 @@ export default async function ConditionLanding({
     <main>
       {/* Hero */}
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 pb-16 pt-24 text-center">
-        <a href="/" className="text-sm font-semibold uppercase tracking-widest text-brand">
-          Calm Point
+        <a href="/" aria-label="Calm Point home" className="inline-flex justify-center">
+          <Wordmark />
         </a>
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <h1 className="text-4xl font-medium leading-tight tracking-tight sm:text-5xl">
           {content.headline}
         </h1>
         <p className="max-w-xl text-lg leading-relaxed text-ink-soft">{content.subhead}</p>
         <a
           href={ctaHref}
-          className="inline-flex h-13 min-h-[52px] items-center rounded-full bg-brand px-8 text-base font-medium text-white shadow-soft transition-transform active:scale-[0.97]"
+          className="inline-flex h-13 min-h-[52px] items-center rounded-full bg-brand px-8 text-base font-medium text-on-brand shadow-soft transition-transform active:scale-[0.97]"
         >
           {config?.screener ? "Start your free 2-minute check-in" : "Get started"}
         </a>
@@ -100,7 +101,7 @@ export default async function ConditionLanding({
         <div className="mt-10 text-center">
           <a
             href={ctaHref}
-            className="inline-flex h-11 items-center rounded-full bg-brand px-6 text-base font-medium text-white shadow-soft"
+            className="inline-flex h-11 items-center rounded-full bg-brand px-6 text-base font-medium text-on-brand shadow-soft"
           >
             {config?.screener ? "Start the check-in" : "Get started"}
           </a>

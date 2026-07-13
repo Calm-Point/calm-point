@@ -26,7 +26,7 @@ export default function CrisisPage() {
       <div className="flex flex-col gap-4">
         <a
           href={`tel:${CRISIS_RESOURCES.lifeline.phone}`}
-          className="flex min-h-[76px] items-center justify-between rounded-lg bg-brand px-6 py-5 text-white shadow-soft transition-transform active:scale-[0.99]"
+          className="flex min-h-[76px] items-center justify-between rounded-lg bg-brand px-6 py-5 text-on-brand shadow-soft transition-transform active:scale-[0.99]"
         >
           <span className="text-xl font-semibold">Call 988</span>
           <span className="text-sm opacity-90">{CRISIS_RESOURCES.lifeline.label}</span>

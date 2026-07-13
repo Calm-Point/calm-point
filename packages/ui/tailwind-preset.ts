@@ -14,6 +14,7 @@ export const calmGlassPreset: Omit<Config, "content"> = {
         "ink-soft": "rgb(var(--cp-ink-soft) / <alpha-value>)",
         brand: "rgb(var(--cp-brand) / <alpha-value>)",
         "brand-tint": "rgb(var(--cp-brand-tint) / <alpha-value>)",
+        "on-brand": "rgb(var(--cp-on-brand) / <alpha-value>)",
         accent: "rgb(var(--cp-accent) / <alpha-value>)",
         positive: "rgb(var(--cp-positive) / <alpha-value>)",
         warn: "rgb(var(--cp-warn) / <alpha-value>)",
@@ -31,6 +32,11 @@ export const calmGlassPreset: Omit<Config, "content"> = {
       },
       transitionTimingFunction: {
         spring: "cubic-bezier(0.32, 0.72, 0, 1)",
+      },
+      fontFamily: {
+        // Serif display face for headings (brand reference). Apps provide
+        // --font-display (web: Fraunces via next/font); Georgia is the fallback.
+        display: ["var(--font-display, Georgia)", "Georgia", "serif"],
       },
       keyframes: {
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Wordmark } from "@/components/brand";
 
 export const metadata: Metadata = {
   title: "How it works",
@@ -33,10 +34,10 @@ export default function HowItWorksPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
       <div className="mb-12 text-center">
-        <a href="/" className="text-sm font-semibold uppercase tracking-widest text-brand">
-          Calm Point
+        <a href="/" aria-label="Calm Point home" className="inline-flex justify-center">
+          <Wordmark />
         </a>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight">How care works</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">How care works</h1>
         <p className="mt-3 text-lg text-ink-soft">
           Real clinicians, real plans — without waiting rooms or phone tag.
         </p>
@@ -62,7 +63,7 @@ export default function HowItWorksPage() {
       <div className="mt-12 text-center">
         <a
           href="/#conditions"
-          className="inline-flex h-12 items-center rounded-full bg-brand px-8 text-base font-medium text-white shadow-soft"
+          className="inline-flex h-12 items-center rounded-full bg-brand px-8 text-base font-medium text-on-brand shadow-soft"
         >
           Start your check-in
         </a>

@@ -121,7 +121,7 @@ export function TherapistClient() {
               <div
                 className={cn(
                   "max-w-[80%] whitespace-pre-wrap rounded-lg px-4 py-3 text-sm leading-relaxed",
-                  turn.who === "you" ? "bg-brand text-white" : "bg-ink/5 text-ink",
+                  turn.who === "you" ? "bg-brand text-on-brand" : "bg-ink/5 text-ink",
                 )}
               >
                 {turn.text}

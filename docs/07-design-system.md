@@ -12,24 +12,29 @@ The product should feel like exhaling: calm, weightless, precise. On iOS especia
 
 ## 2. Tokens (implemented as Tailwind preset + CSS vars in `packages/ui`; RN theme mirrors them)
 
-### Color — "Dusk & Sage"
+### Color — "Cream & Forest" (owner-approved design reference, 2026-07)
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `bg` | `#F7F6F3` (warm paper) | `#0F1115` | app background |
-| `surface` | `#FFFFFF` | `#171A21` | cards, sheets |
-| `ink` | `#1C1E26` | `#F2F1EC` | primary text |
-| `ink-soft` | `#5A5E6B` | `#9BA0AD` | secondary text |
-| `brand` | `#3E6B5C` (deep sage) | `#7FB8A4` | primary actions, focus |
-| `brand-tint` | `#E8F0EC` | `#1E2B27` | selected states, chips |
+| `bg` | `#F3EFE6` (warm cream) | `#121612` | app background |
+| `surface` | `#FBF9F4` (lifted cream) | `#1A1F1A` | cards, sheets |
+| `ink` | `#1F3327` (deep forest) | `#ECEEE5` | primary text, headings |
+| `ink-soft` | `#5C635A` | `#9CA598` | secondary text |
+| `brand` | `#4A6B55` (sage) | `#8AB595` | primary actions, focus |
+| `brand-tint` | `#E4EAD8` (pale sage) | `#222D24` | selected states, chips, trust surfaces |
+| `on-brand` | `#FFFFFF` | `#121612` | text/icons on brand-filled surfaces (dark brand is light, so dark mode needs dark text) |
 | `accent` | `#C58A5A` (warm clay) | `#D9A87C` | highlights, illustration |
-| `positive` / `warn` / `danger` | `#3D8168` / `#B98A2F` / `#B4483E` | (+dark variants) | semantic |
-| `glass` | `rgba(255,255,255,.62)` + blur 24 + sat 1.4 | `rgba(23,26,33,.55)` + blur 24 | chrome material |
+| `positive` / `warn` / `danger` | `#3D8168` / `#B0822C` / `#B4483E` | (+dark variants) | semantic |
+| `glass` | `rgba(255,255,255,.62)` + blur 24 + sat 1.4 | `rgba(26,31,26,.55)` + blur 24 | chrome material |
+
+Pastel condition chips (landing/mobile home): sage `brand-tint`, lavender `#E6E1F2`/`#7A6BA8`, sky `#DDE8F0`/`#5B7E99`, wheat `#F0E8CE`/`#9A7F35`.
 
 All pairs contrast-checked ≥ 4.5:1 (body) / 3:1 (large text) in both modes.
 
 ### Type
-- **Display/UI**: system stacks — SF Pro on Apple platforms (native feel is the point), Inter on web/Android.
-- Scale (web px / mobile pt): `display 44/40 · title 28/26 · heading 20/19 · body 16/16 · caption 13/13`; line-height 1.5 body, 1.15 display; `-0.02em` tracking on display sizes.
+- **Display**: serif — **Fraunces** (variable, normal + italic; `--font-display`, web via next/font). All `h1–h3` and card titles render in the display face; the hero uses italic for emphasis words. Fallback: Georgia.
+- **Body/UI**: system stacks — SF Pro on Apple platforms (native feel is the point), Inter/system on web/Android. Buttons, labels, nav stay sans.
+- Scale (web px / mobile pt): `display 44/40 · title 28/26 · heading 20/19 · body 16/16 · caption 13/13`; line-height 1.5 body, 1.1 display; `-0.02em` tracking on display sizes. Display weight is `medium` — Fraunces reads heavy above that.
+- **Brand marks**: circle-enclosed leaf (`LeafMark`), letterspaced uppercase wordmark, and a soft botanical branch flourish behind hero copy (`apps/web/src/components/brand.tsx`).
 - Questionnaire prompts render at `heading` size minimum — this flow is read at arm's length on a phone in bed.
 
 ### Space, radius, elevation

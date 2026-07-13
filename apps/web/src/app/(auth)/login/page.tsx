@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button, Card, CardTitle, Field } from "@calm-point/ui";
+import { Wordmark } from "@/components/brand";
 
 function LoginForm() {
   const router = useRouter();
@@ -113,7 +114,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
+      <a href="/" aria-label="Calm Point home">
+        <Wordmark />
+      </a>
       <Suspense>
         <LoginForm />
       </Suspense>

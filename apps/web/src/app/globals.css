@@ -2,28 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* "Calm Glass" tokens — docs/07-design-system.md §2 */
+/* "Calm Glass" tokens — docs/07-design-system.md §2, tuned to the approved
+   mobile design reference: warm cream paper, deep forest ink, sage brand. */
 :root {
-  --cp-bg: 247 246 243; /* #F7F6F3 warm paper */
-  --cp-surface: 255 255 255;
-  --cp-ink: 28 30 38; /* #1C1E26 */
-  --cp-ink-soft: 90 94 107; /* #5A5E6B */
-  --cp-brand: 62 107 92; /* #3E6B5C deep sage */
-  --cp-brand-tint: 232 240 236; /* #E8F0EC */
+  --cp-bg: 243 239 230; /* #F3EFE6 warm cream */
+  --cp-surface: 251 249 244; /* #FBF9F4 lifted cream card */
+  --cp-ink: 31 51 39; /* #1F3327 deep forest */
+  --cp-ink-soft: 92 99 90; /* #5C635A warm gray-green */
+  --cp-brand: 74 107 85; /* #4A6B55 sage green */
+  --cp-brand-tint: 228 234 216; /* #E4EAD8 pale sage */
+  --cp-on-brand: 255 255 255; /* text on brand-filled surfaces */
   --cp-accent: 197 138 90; /* #C58A5A warm clay */
   --cp-positive: 61 129 104; /* #3D8168 */
-  --cp-warn: 185 138 47; /* #B98A2F */
+  --cp-warn: 176 130 44; /* #B0822C */
   --cp-danger: 180 72 62; /* #B4483E */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cp-bg: 15 17 21; /* #0F1115 */
-    --cp-surface: 23 26 33; /* #171A21 */
-    --cp-ink: 242 241 236; /* #F2F1EC */
-    --cp-ink-soft: 155 160 173; /* #9BA0AD */
-    --cp-brand: 127 184 164; /* #7FB8A4 */
-    --cp-brand-tint: 30 43 39; /* #1E2B27 */
+    --cp-bg: 18 22 18; /* #121612 */
+    --cp-surface: 26 31 26; /* #1A1F1A */
+    --cp-ink: 236 238 229; /* #ECEEE5 */
+    --cp-ink-soft: 156 165 152; /* #9CA598 */
+    --cp-brand: 138 181 149; /* #8AB595 */
+    --cp-brand-tint: 34 45 36; /* #222D24 */
+    --cp-on-brand: 18 22 18; /* dark ink on the light dark-mode sage */
     --cp-accent: 217 168 124; /* #D9A87C */
     --cp-positive: 111 179 154;
     --cp-warn: 214 172 94;
@@ -33,4 +36,16 @@
 
 body {
   @apply bg-bg text-ink antialiased;
+}
+
+/* Display type: serif headings are part of the brand (design reference),
+   not per-page styling. Interactive/label text stays sans. */
+h1,
+h2,
+h3 {
+  @apply font-display;
+}
+
+::selection {
+  background: rgb(var(--cp-brand) / 0.25);
 }

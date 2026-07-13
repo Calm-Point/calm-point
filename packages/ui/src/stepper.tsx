@@ -20,7 +20,7 @@ export function Stepper({ steps, current, className }: StepperProps) {
               aria-current={active ? "step" : undefined}
               className={cn(
                 "grid size-7 flex-none place-items-center rounded-full text-xs font-semibold transition-colors",
-                done ? "bg-brand text-white" : active ? "bg-brand-tint text-brand" : "bg-ink/5 text-ink-soft",
+                done ? "bg-brand text-on-brand" : active ? "bg-brand-tint text-brand" : "bg-ink/5 text-ink-soft",
               )}
             >
               {done ? (

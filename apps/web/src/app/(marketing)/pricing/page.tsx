@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Card, CardTitle } from "@calm-point/ui";
+import { Wordmark } from "@/components/brand";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -41,10 +42,10 @@ export default function PricingPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-20">
       <div className="mb-12 text-center">
-        <a href="/" className="text-sm font-semibold uppercase tracking-widest text-brand">
-          Calm Point
+        <a href="/" aria-label="Calm Point home" className="inline-flex justify-center">
+          <Wordmark />
         </a>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight">Simple, honest pricing</h1>
+        <h1 className="mt-3 text-4xl font-medium tracking-tight">Simple, honest pricing</h1>
         <p className="mx-auto mt-3 max-w-xl text-lg text-ink-soft">
           A membership for everything between visits, plus a clear per-visit fee.
           No surprise bills. Cancel anytime.
@@ -82,7 +83,7 @@ export default function PricingPage() {
       <div className="mt-10 text-center">
         <a
           href="/#conditions"
-          className="inline-flex h-12 items-center rounded-full bg-brand px-8 text-base font-medium text-white shadow-soft"
+          className="inline-flex h-12 items-center rounded-full bg-brand px-8 text-base font-medium text-on-brand shadow-soft"
         >
           Get started
         </a>

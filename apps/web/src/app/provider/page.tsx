@@ -118,7 +118,7 @@ export default async function ProviderDashboard() {
                     </a>
                     <a
                       href={`/provider/visit/${a.id}`}
-                      className="rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white"
+                      className="rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-on-brand"
                     >
                       {a.status === "IN_PROGRESS" ? "Rejoin" : "Start"}
                     </a>

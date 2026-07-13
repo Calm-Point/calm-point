@@ -31,7 +31,7 @@ export default async function PatientDashboard() {
       {needsOnboarding ? (
         <a
           href="/app/onboarding"
-          className="mb-6 block rounded-lg bg-brand p-5 text-white shadow-soft transition-transform hover:-translate-y-0.5"
+          className="mb-6 block rounded-lg bg-brand p-5 text-on-brand shadow-soft transition-transform hover:-translate-y-0.5"
         >
           <p className="font-semibold">Finish setting up your care →</p>
           <p className="text-sm opacity-90">

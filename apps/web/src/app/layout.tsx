@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
+import { Fraunces } from "next/font/google";
 import { ToastProvider } from "@calm-point/ui";
 import "./globals.css";
+
+// Brand display serif (design reference) — headings only; body stays sans.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +24,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={fraunces.variable}>
       <body>
         <ToastProvider>{children}</ToastProvider>
       </body>
