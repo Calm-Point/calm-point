@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, Card, Field, Skeleton } from "@calm-point/ui";
+import { US_STATES } from "@calm-point/shared";
+import { Badge, Button, Card, Field, Select, Skeleton, useToast } from "@calm-point/ui";
+
+const STATE_OPTIONS = US_STATES.map((s) => ({ value: s, label: s }));
 
 interface License {
   state: string;
@@ -38,6 +41,7 @@ export function ProvidersClient() {
   const [message, setMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showInvite, setShowInvite] = useState(false);
+  const toast = useToast();
 
   const load = useCallback(() => {
     fetch("/api/v1/admin/providers")
@@ -49,10 +53,10 @@ export function ProvidersClient() {
 
   async function credential(providerId: string) {
     setBusyId(providerId);
-    setMessage(null);
     const res = await fetch(`/api/v1/admin/providers/${providerId}/credential`, { method: "POST" });
     const data = await res.json().catch(() => ({}));
-    setMessage(res.ok ? "Licenses verified — provider credentialed." : (data.error ?? "Failed."));
+    if (res.ok) toast.show("Licenses verified — provider credentialed.", { tone: "positive" });
+    else setMessage(data.error ?? "Failed.");
     setBusyId(null);
     load();
   }
@@ -129,7 +133,7 @@ export function ProvidersClient() {
               Initial license (optional — can be added later)
             </p>
             <div className="grid grid-cols-3 gap-3">
-              <Field label="State" name="licenseState" placeholder="NY" maxLength={2} />
+              <Select label="State" name="licenseState" placeholder="Select…" options={STATE_OPTIONS} />
               <Field label="License #" name="licenseNumber" />
               <Field label="Expires" name="licenseExpiresAt" type="date" />
             </div>

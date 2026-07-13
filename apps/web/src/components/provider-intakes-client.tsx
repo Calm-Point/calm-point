@@ -31,9 +31,9 @@ interface Detail {
 }
 
 const FLAG_STYLES: Record<RiskFlag["severity"], string> = {
-  critical: "border-l-4 border-red-600",
-  high: "border-l-4 border-amber-600",
-  medium: "border-l-4 border-emerald-700",
+  critical: "border-l-4 border-danger",
+  high: "border-l-4 border-warn",
+  medium: "border-l-4 border-brand",
 };
 
 export function ProviderIntakesClient() {
@@ -87,11 +87,11 @@ export function ProviderIntakesClient() {
             key={item.id}
             type="button"
             onClick={() => void open(item)}
-            className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm hover:border-emerald-700"
+            className="flex w-full items-center justify-between rounded-2xl border border-ink/10 bg-surface px-5 py-4 text-left shadow-soft hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
           >
             <div>
               <p className="font-semibold">{item.patientName}</p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-soft">
                 Intake analysis · {new Date(item.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -106,24 +106,24 @@ export function ProviderIntakesClient() {
           {detail ? (
             <>
               {(detail.riskFlags ?? []).map((flag) => (
-                <div key={flag.label} className={`rounded-xl bg-slate-50 px-4 py-3 text-sm ${FLAG_STYLES[flag.severity]}`}>
+                <div key={flag.label} className={`rounded-xl bg-ink/5 px-4 py-3 text-sm ${FLAG_STYLES[flag.severity]}`}>
                   <p className="font-medium">{flag.label}</p>
-                  <p className="text-slate-600">{flag.detail}</p>
+                  <p className="text-ink-soft">{flag.detail}</p>
                 </div>
               ))}
               <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">
                   AI pre-visit summary — decision support only; you diagnose and sign
                 </p>
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{detail.summary}</p>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{detail.summary}</p>
               </div>
               {detail.scores?.length ? (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Screening profile</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Screening profile</p>
                   {detail.scores.map((s) => (
-                    <div key={s.title} className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm">
+                    <div key={s.title} className="flex items-center justify-between rounded-lg border border-ink/10 px-3 py-2 text-sm">
                       <span>{s.title}</span>
-                      <span className="tabular-nums text-slate-600">
+                      <span className="tabular-nums text-ink-soft">
                         {s.score}/{s.max}
                         {s.severity ? ` · ${s.severity}` : ""}
                       </span>

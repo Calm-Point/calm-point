@@ -20,7 +20,7 @@ export default async function VerifyPage() {
       roleLabel="Patient"
       nav={NAV}
     >
-      <p className="mb-4 max-w-xl text-sm text-slate-600">
+      <p className="mb-4 max-w-xl text-sm text-ink-soft">
         Required before your first visit. Photos are encrypted at rest and shared only with your
         care team — never public.
       </p>

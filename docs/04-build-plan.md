@@ -40,9 +40,9 @@ This is the execution plan for the dedicated build agent. Work phases **in order
 ### 1.3 Design system (`packages/ui`)
 - [x] Tokens from `docs/07-design-system.md` (color, type scale, spacing, radius, glass materials, motion durations/easings) as Tailwind preset + CSS variables
 - [x] First component set: Button, Field(Input), Card, GlassPanel, Badge, Skeleton, EmptyState
-- [ ] Remaining components: Select, Sheet/Modal, Toast, Stepper, ProgressBar, Avatar
+- [x] Remaining components: Select, Sheet/Modal, Toast, Stepper, ProgressBar, Avatar — wired into real screens (admin invite form, portal mobile nav, intake progress) and live-verified in light + dark mode
 - [ ] Storybook (or ladle) with light/dark + reduced-motion states
-- [ ] Accessibility pass: focus rings, ARIA, contrast ≥ 4.5:1
+- [x] Accessibility pass: fixed a hydration bug (Toast/Sheet portals mismatching SSR), added missing focus-visible rings on intake/inbox buttons, added keyboard 1–9 question selection (docs/07 §3), swept 6 screens off Tailwind-default colors onto design tokens (dark-mode contrast), added ARIA progressbar semantics to the intake progress bar, added a mobile nav (PortalShell had none below `sm`)
 
 ### Acceptance
 - [x] Three seeded users (patient/provider/admin) sign in; each lands in a role-correct portal; provider/admin forced through MFA setup; role boundaries enforced — verified by 7-test Playwright suite (`apps/web/e2e/auth.spec.ts`), green locally

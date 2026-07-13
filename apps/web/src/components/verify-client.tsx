@@ -123,7 +123,7 @@ export function VerifyClient() {
       <Card className="max-w-xl space-y-3 text-center">
         <Badge>Verified</Badge>
         <h2 className="text-xl font-semibold">You&apos;re ready to schedule.</h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-ink-soft">
           Your documents are encrypted and shared only with your care team.
         </p>
         <Button onClick={() => (window.location.href = "/app/appointments")}>
@@ -137,7 +137,7 @@ export function VerifyClient() {
     <form onSubmit={submit} className="max-w-xl space-y-5">
       <Card className="space-y-3">
         <h2 className="font-semibold">Photo ID</h2>
-        <p className="text-sm text-slate-600">Driver&apos;s license, state ID, or passport.</p>
+        <p className="text-sm text-ink-soft">Driver&apos;s license, state ID, or passport.</p>
         <input
           type="file"
           accept="image/*"
@@ -174,7 +174,7 @@ export function VerifyClient() {
             <Button type="button" variant="secondary" disabled={busy} onClick={() => void checkEligibility()}>
               Check coverage now
             </Button>
-            {eligibility ? <p className="text-sm text-emerald-800">{eligibility}</p> : null}
+            {eligibility ? <p className="text-sm text-brand">{eligibility}</p> : null}
           </div>
         ) : null}
       </Card>
@@ -200,7 +200,7 @@ export function VerifyClient() {
         ))}
       </Card>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
       <Button type="submit" disabled={busy}>
         {busy ? "Submitting…" : "Submit & schedule"}
       </Button>

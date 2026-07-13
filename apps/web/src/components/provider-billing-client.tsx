@@ -85,8 +85,8 @@ export function ProviderBillingClient() {
   return (
     <div className="max-w-xl space-y-5">
       {state.accessFrozen ? (
-        <Card className="border-red-200 bg-red-50">
-          <p className="text-sm font-semibold text-red-800">
+        <Card className="border-danger/20 bg-danger/10">
+          <p className="text-sm font-semibold text-danger">
             Portal access is frozen — your subscription invoice is unpaid. Update payment to
             restore the clinical suite.
           </p>
@@ -98,7 +98,7 @@ export function ProviderBillingClient() {
           <h2 className="font-semibold">Payouts</h2>
           <Badge>{state.payoutsConnected ? "connected" : "not connected"}</Badge>
         </div>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-ink-soft">
           Consultation fees are split automatically: you receive the net of each visit directly to
           your bank via Stripe; the platform withholds its 10% infrastructure fee
           {" "}(+ $10 on platform-sourced patients).
@@ -114,11 +114,11 @@ export function ProviderBillingClient() {
           <Badge>{state.saas ? state.saas.status.toLowerCase() : "not subscribed"}</Badge>
         </div>
         {state.saas ? (
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink-soft">
             Current period ends {new Date(state.saas.currentPeriodEnd).toLocaleDateString()}.
           </p>
         ) : (
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink-soft">
             Scheduling, AI-drafted notes, intake analyses, secure messaging, and payouts.
           </p>
         )}
@@ -129,8 +129,8 @@ export function ProviderBillingClient() {
         ) : null}
       </Card>
 
-      {notice ? <p className="text-sm text-emerald-800">{notice}</p> : null}
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {notice ? <p className="text-sm text-brand">{notice}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
   );
 }

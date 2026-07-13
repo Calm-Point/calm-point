@@ -20,7 +20,7 @@ export default async function IntakeBatteryPage() {
       roleLabel="Patient"
       nav={NAV}
     >
-      <p className="mb-4 max-w-xl text-sm text-slate-600">
+      <p className="mb-4 max-w-xl text-sm text-ink-soft">
         Validated screeners across mood, anxiety, attention, sleep, trauma, and substance use.
         Private — your answers and a decision-support summary go to your provider before your
         first visit. Not for emergencies: in crisis, call or text 988.

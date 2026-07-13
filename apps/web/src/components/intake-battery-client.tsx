@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { INTAKE_BATTERY } from "@calm-point/shared";
-import { Badge, Button, Card, Skeleton } from "@calm-point/ui";
+import { Badge, Button, Card, ProgressBar, Skeleton } from "@calm-point/ui";
 
 /**
  * Signed-in intake battery runner (docs/10 §1.2): administers each validated
@@ -66,6 +66,22 @@ export function IntakeBatteryClient() {
   const answeredBefore = (ii: number, qi: number) =>
     instruments.slice(0, ii).reduce((n, i) => n + i.questions.length, 0) + qi;
 
+  // Keyboard 1–9 selection (docs/07 §3: Questionnaire Stepper).
+  useEffect(() => {
+    if (stage.kind !== "asking") return;
+    const options = instruments[stage.instrumentIdx]?.questions[stage.questionIdx]?.options;
+    if (!options) return;
+    function onKeyDown(e: KeyboardEvent) {
+      const n = Number(e.key);
+      const option = options![n - 1];
+      if (!option) return;
+      void choose(option.id);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, instruments]);
+
   const submitInstrument = useCallback(
     async (instrument: LoadedInstrument, chosen: Record<string, string>) => {
       const res = await fetch(`/api/v1/checkins/${instrument.slug}`, {
@@ -128,7 +144,7 @@ export function IntakeBatteryClient() {
   if (stage.kind === "error") {
     return (
       <Card className="max-w-xl">
-        <p className="text-sm text-red-700">{stage.message}</p>
+        <p className="text-sm text-danger">{stage.message}</p>
         <Button className="mt-4" onClick={() => window.location.reload()}>
           Try again
         </Button>
@@ -140,19 +156,19 @@ export function IntakeBatteryClient() {
     return (
       <Card className="max-w-xl space-y-4">
         <h2 className="text-xl font-semibold">Thank you for being honest. Let&apos;s get you real support, right now.</h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-ink-soft">
           Some of what you shared tells us you deserve more immediate care than an online intake.
           Your care team has been alerted. Free, confidential help is available 24/7.
         </p>
         <div className="flex flex-col gap-2">
-          <a href="tel:988" className="rounded-xl bg-emerald-800 px-5 py-3 text-center font-semibold text-white">
+          <a href="tel:988" className="rounded-xl bg-brand px-5 py-3 text-center font-semibold text-white">
             Call or text 988 — Suicide &amp; Crisis Lifeline
           </a>
-          <a href="sms:741741" className="rounded-xl border border-emerald-800 px-5 py-3 text-center font-semibold text-emerald-800">
+          <a href="sms:741741" className="rounded-xl border border-brand px-5 py-3 text-center font-semibold text-brand">
             Text HOME to 741741 — Crisis Text Line
           </a>
         </div>
-        <p className="text-xs text-slate-500">In immediate danger? Call 911 or go to your nearest emergency room.</p>
+        <p className="text-xs text-ink-soft">In immediate danger? Call 911 or go to your nearest emergency room.</p>
       </Card>
     );
   }
@@ -162,7 +178,7 @@ export function IntakeBatteryClient() {
       <Card className="max-w-xl space-y-3 text-center">
         <Badge>Intake complete</Badge>
         <h2 className="text-xl font-semibold">Thank you — this really helps.</h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-ink-soft">
           Your responses{stage.analysisRequested ? " and an AI-generated summary" : ""} are shared
           securely with your provider, who reviews them before your visit.
         </p>
@@ -174,7 +190,7 @@ export function IntakeBatteryClient() {
   if (stage.kind === "submitting") {
     return (
       <Card className="max-w-xl">
-        <p className="text-sm text-slate-600">Saving…</p>
+        <p className="text-sm text-ink-soft">Saving…</p>
       </Card>
     );
   }
@@ -185,29 +201,29 @@ export function IntakeBatteryClient() {
 
   return (
     <Card className="max-w-xl" aria-live="polite">
-      <div className="mb-3 flex items-center justify-between text-sm text-slate-500">
+      <div className="mb-3 flex items-center justify-between text-sm text-ink-soft">
         <span>{instrument.title}</span>
         <span className="tabular-nums">
           {progress + 1} of {totalQuestions}
         </span>
       </div>
-      <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-slate-200">
-        <div
-          className="h-full rounded-full bg-emerald-700 transition-all"
-          style={{ width: `${Math.round((progress / Math.max(totalQuestions, 1)) * 100)}%` }}
-        />
-      </div>
-      {question.helpText ? <p className="mb-1 text-sm text-slate-500">{question.helpText}</p> : null}
+      <ProgressBar
+        className="mb-5"
+        value={progress}
+        max={totalQuestions}
+        label={`Question ${progress + 1} of ${totalQuestions}`}
+      />
+      {question.helpText ? <p className="mb-1 text-sm text-ink-soft">{question.helpText}</p> : null}
       <h2 className="mb-4 text-lg font-semibold leading-snug">{question.prompt}</h2>
-      <div className="flex flex-col gap-2" role="radiogroup">
+      <div className="flex flex-col gap-2">
         {question.options.map((option, idx) => (
           <button
             key={option.id}
             type="button"
             onClick={() => void choose(option.id)}
-            className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium hover:border-emerald-700"
+            className="flex min-h-12 items-center gap-3 rounded-xl border border-ink/10 bg-surface px-4 py-3 text-left text-sm font-medium hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
           >
-            <span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-800">
+            <span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-brand-tint text-xs font-semibold text-brand">
               {idx + 1}
             </span>
             {option.label}

@@ -1,5 +1,6 @@
-import { GlassPanel, Badge } from "@calm-point/ui";
+import { GlassPanel, Badge, Avatar } from "@calm-point/ui";
 import { SignOutButton } from "./sign-out-button";
+import { MobileNav } from "./mobile-nav";
 
 export function PortalShell({
   title,
@@ -36,8 +37,12 @@ export function PortalShell({
           </div>
           <div className="flex items-center gap-3">
             <Badge tone="brand">{roleLabel}</Badge>
-            <span className="hidden text-sm text-ink-soft sm:inline">{userName}</span>
+            <span className="hidden items-center gap-2 sm:flex">
+              <Avatar name={userName || roleLabel} size="sm" />
+              <span className="text-sm text-ink-soft">{userName}</span>
+            </span>
             <SignOutButton />
+            <MobileNav nav={nav} />
           </div>
         </div>
       </GlassPanel>
